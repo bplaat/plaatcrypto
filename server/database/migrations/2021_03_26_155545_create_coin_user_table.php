@@ -17,7 +17,7 @@ class CreateCoinUserTable extends Migration
             $table->id();
             $table->unsignedBigInteger('coin_id');
             $table->unsignedBigInteger('user_id');
-            $table->float('amount');
+            $table->unsignedDecimal('amount', 12, 9);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

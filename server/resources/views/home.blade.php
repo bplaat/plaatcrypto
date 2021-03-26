@@ -12,7 +12,7 @@
             @foreach (Auth::user()->coins as $coin)
                 <div class="box content">
                     <h3 class="title is-5">{{ $coin->name }} ({{ $coin->symbol }})</h3>
-                    <p>@lang('home.amount'): <strong>{{ $coin->pivot->amount }} {{ $coin->symbol }}</strong></h3>
+                    <p>@lang('home.amount'): <strong>{{ round($coin->pivot->amount, 3) }} {{ $coin->symbol }}</strong></h3>
                 </div>
             @endforeach
         @else
