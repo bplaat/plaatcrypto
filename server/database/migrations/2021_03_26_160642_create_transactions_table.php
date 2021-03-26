@@ -22,8 +22,9 @@ class CreateTransactionsTable extends Migration
             $table->unsignedTinyInteger('type')->default(Transaction::TYPE_BUY);
             $table->float('amount');
             $table->float('price');
-            $table->datetime('date');
-            $table->timestamps();
+            $table->timestamp('date');
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->foreign('coin_id')
                 ->references('id')

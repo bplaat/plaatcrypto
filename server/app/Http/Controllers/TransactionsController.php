@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Coin;
+use App\Models\CoinUser;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,7 +21,8 @@ class TransactionsController extends Controller
         } else {
             $transactions = Transaction::all();
         }
-        $transactions = $transactions->paginate(config('pagination.web.limit'))->withQueryString();
+        $transactions = $transactions->sortByDesc('created_at')
+            ->paginate(config('pagination.web.limit'))->withQueryString();
 
         // Return the transactions index view
         return view('transactions.index', ['transactions' => $transactions]);
@@ -60,11 +63,28 @@ class TransactionsController extends Controller
         ]);
 
         // Process transaction
-        // $coin = Coin::first('id', $fields['coin_id']);
-
-        // Auth::user()->coins()->attach($coin, [
-        //     'amount' => $fields['amount']
-        // ]);
+        $coin = Coin::where('id', $fields['coin_id'])->first();
+        $coinUserQuery = CoinUser::where('coin_id', $fields['coin_id'])->where('user_id', Auth::id());
+        if ($coinUserQuery->count() > 0) {
+            // Recalculate total coin amount
+            $amount = 0;
+            $transactions = Transaction::where('coin_id', $fields['coin_id'])->where('user_id', Auth::id())->get();
+            foreach ($transactions as $transaction) {
+                if ($transaction->type == Transaction::TYPE_BUY) {
+                    $amount += $transaction->amount;
+                }
+                if ($transaction->type == Transaction::TYPE_SELL) {
+                    $amount -= $transaction->amount;
+                }
+            }
+            Auth::user()->coins()->updateExistingPivot($coin, [
+                'amount' => $amount
+            ]);
+        } else {
+            Auth::user()->coins()->attach($coin, [
+                'amount' => $fields['amount']
+            ]);
+        }
 
         // Go to the new transaction show page
         return redirect()->route('transactions.show', $transaction);
@@ -108,6 +128,24 @@ class TransactionsController extends Controller
             'amount' => $fields['amount'],
             'price' => $fields['price'],
             'date' => $fields['date'] . ' ' . $fields['time']
+        ]);
+
+        // Process transaction
+        $coin = Coin::where('id', $fields['coin_id'])->first();
+
+        // Recalculate total coin amount
+        $amount = 0;
+        $transactions = Transaction::where('coin_id', $fields['coin_id'])->where('user_id', Auth::id())->get();
+        foreach ($transactions as $transaction) {
+            if ($transaction->type == Transaction::TYPE_BUY) {
+                $amount += $transaction->amount;
+            }
+            if ($transaction->type == Transaction::TYPE_SELL) {
+                $amount -= $transaction->amount;
+            }
+        }
+        Auth::user()->coins()->updateExistingPivot($coin, [
+            'amount' => $amount
         ]);
 
         // Go to the transaction show page

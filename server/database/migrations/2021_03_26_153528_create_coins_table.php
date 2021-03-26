@@ -17,7 +17,8 @@ class CreateCoinsTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('symbol')->unique();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

@@ -23,4 +23,10 @@ class Transaction extends Model
     protected $casts = [
         'date' => 'datetime'
     ];
+
+    // Search by a query
+    public static function search($query)
+    {
+        return static::where('name', 'LIKE', '%' . $query . '%');
+    }
 }

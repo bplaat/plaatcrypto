@@ -28,7 +28,7 @@
                                 <div class="navbar-item has-dropdown is-hoverable">
                                     <a class="navbar-link is-arrowless" href="{{ route('transactions.index') }}">@lang('layout.header.transactions')</a>
                                     <div class="navbar-dropdown">
-                                        @foreach (Auth::user()->transactions->take(10) as $transaction)
+                                        @foreach (Auth::user()->transactions->sortByDesc('created_at')->take(10) as $transaction)
                                             <a class="navbar-item" href="{{ route('transactions.show', $transaction) }}">{{ $transaction->name }}</a>
                                         @endforeach
                                     </div>
