@@ -2,6 +2,7 @@
 
 return [
     // Layout header
+    'header.transactions' => 'Transactions',
     'header.admin.home' => 'Admin',
     'header.admin.users' => 'Users',
     'header.admin.coins' => 'Coins',

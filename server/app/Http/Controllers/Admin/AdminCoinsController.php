@@ -46,13 +46,13 @@ class AdminCoinsController extends Controller
     }
 
     // Admin coins show route
-    public function show(coin $coin)
+    public function show(Coin $coin)
     {
         return view('admin.coins.show', [ 'coin' => $coin ]);
     }
 
     // Admin coins edit route
-    public function edit(coin $coin)
+    public function edit(Coin $coin)
     {
         return view('admin.coins.edit', ['coin' => $coin]);
     }
@@ -82,7 +82,7 @@ class AdminCoinsController extends Controller
     }
 
     // Admin coins delete route
-    public function delete(coin $coin)
+    public function delete(Coin $coin)
     {
         // Delete coin
         $coin->delete();

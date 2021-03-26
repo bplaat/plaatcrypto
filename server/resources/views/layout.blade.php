@@ -24,6 +24,19 @@
                 <div class="navbar-menu">
                     @auth
                         <div class="navbar-start">
+                            @if (Auth::user()->transactions->count() > 0)
+                                <div class="navbar-item has-dropdown is-hoverable">
+                                    <a class="navbar-link is-arrowless" href="{{ route('transactions.index') }}">@lang('layout.header.transactions')</a>
+                                    <div class="navbar-dropdown">
+                                        @foreach (Auth::user()->transactions->take(10) as $transaction)
+                                            <a class="navbar-item" href="{{ route('transactions.show', $transaction) }}">{{ $transaction->name }}</a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <a class="navbar-item" href="{{ route('transactions.index') }}">@lang('layout.header.transactions')</a>
+                            @endif
+
                             @if (Auth::user()->role == App\Models\User::ROLE_ADMIN)
                                 <div class="navbar-item has-dropdown is-hoverable">
                                     <a class="navbar-link is-arrowless" href="{{ route('admin.home') }}">@lang('layout.header.admin.home')</a>

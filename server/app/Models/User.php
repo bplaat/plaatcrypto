@@ -23,11 +23,6 @@ class User extends Authenticatable
     const ROLE_NORMAL = 0;
     const ROLE_ADMIN = 1;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'firstname',
         'insertion',
@@ -44,24 +39,26 @@ class User extends Authenticatable
         'role'
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // A user belongs to many coins
+    public function coins()
+    {
+        return $this->belongsToMany(Coin::class)->withPivot('amount');
+    }
+
+    // A user has many transactions
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 
     // Get user full name (firstname insertion lastname)
     public function name()

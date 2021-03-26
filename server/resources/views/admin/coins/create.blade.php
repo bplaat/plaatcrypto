@@ -33,7 +33,7 @@
             <label class="label" for="symbol">@lang('admin/coins.create.symbol')</label>
 
             <div class="control">
-                <input class="input @error('symbol') is-danger @enderror" type="text" id="symbol" name="symbol" value="{{ old('symbol') }}" autofocus required>
+                <input class="input @error('symbol') is-danger @enderror" type="text" id="symbol" name="symbol" value="{{ old('symbol') }}" required>
             </div>
 
             @error('symbol')
