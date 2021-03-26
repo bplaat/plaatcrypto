@@ -65,7 +65,7 @@ class AdminUsersController extends Controller
             'role' => $fields['role']
         ]);
 
-        // Go to the new admin user page
+        // Go to the new admin user show page
         return redirect()->route('admin.users.show', $user);
     }
 
@@ -142,7 +142,7 @@ class AdminUsersController extends Controller
             ]);
         }
 
-        // Go to the admin user page
+        // Go to the admin user show page
         return redirect()->route('admin.users.show', $user);
     }
 

@@ -4,6 +4,7 @@ return [
     // Layout header
     'header.admin.home' => 'Admin',
     'header.admin.users' => 'Users',
+    'header.admin.coins' => 'Coins',
     'header.settings' => 'Settings',
     'header.logout' => 'Logout',
     'header.login' => 'Login',

@@ -17,7 +17,6 @@
     <form method="POST" action="{{ route('admin.users.store') }}">
         @csrf
 
-
         <div class="columns">
             <div class="column">
                 <div class="field">

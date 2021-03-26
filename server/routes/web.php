@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SettingsController;
 
 use App\Http\Controllers\Admin\AdminUsersController;
+use App\Http\Controllers\Admin\AdminCoinsController;
 
 use App\Models\User;
 
@@ -37,6 +38,15 @@ Route::middleware('admin')->group(function () {
     Route::get('/admin/users/{user}/delete', [AdminUsersController::class, 'delete'])->name('admin.users.delete');
     Route::get('/admin/users/{user}', [AdminUsersController::class, 'show'])->name('admin.users.show');
     Route::post('/admin/users/{user}', [AdminUsersController::class, 'update'])->name('admin.users.update');
+
+    // Admin coins
+    Route::get('/admin/coins', [AdmincoinsController::class, 'index'])->name('admin.coins.index');
+    Route::view('/admin/coins/create', 'admin.coins.create')->name('admin.coins.create');
+    Route::post('/admin/coins', [AdmincoinsController::class, 'store'])->name('admin.coins.store');
+    Route::get('/admin/coins/{coin}/edit', [AdmincoinsController::class, 'edit'])->name('admin.coins.edit');
+    Route::get('/admin/coins/{coin}/delete', [AdmincoinsController::class, 'delete'])->name('admin.coins.delete');
+    Route::get('/admin/coins/{coin}', [AdmincoinsController::class, 'show'])->name('admin.coins.show');
+    Route::post('/admin/coins/{coin}', [AdmincoinsController::class, 'update'])->name('admin.coins.update');
 });
 
 // Guest routes
