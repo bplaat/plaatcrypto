@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('admin/coins.edit.title'))
+@section('title', __('admin/coins.edit.title', ['coin.name' => $coin->name]))
 
 @section('content')
     <div class="breadcrumb">

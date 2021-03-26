@@ -10,4 +10,11 @@ class Coin extends Model
         'name',
         'symbol'
     ];
+
+    // Search by a query
+    public static function search($query)
+    {
+        return static::where('name', 'LIKE', '%' . $query . '%')
+            ->orWhere('symbol', 'LIKE', '%' . $query . '%');
+    }
 }

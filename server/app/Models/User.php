@@ -96,5 +96,4 @@ class User extends Authenticatable
             ->orWhere('city', 'LIKE', '%' . $query . '%')
             ->orWhere('country', 'LIKE', '%' . $query . '%');
     }
-
 }
