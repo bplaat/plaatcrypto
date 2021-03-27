@@ -155,6 +155,24 @@ class TransactionsController extends Controller
     // Transactions delete route
     public function delete(Transaction $transaction)
     {
+        // Process transaction
+        $coin = Coin::where('id', $transaction->coin_id)->first();
+
+        // Recalculate total coin amount
+        $amount = 0;
+        $transactions = Transaction::where('coin_id', $transaction->coin_id)->where('user_id', Auth::id())->get();
+        foreach ($transactions as $transaction) {
+            if ($transaction->type == Transaction::TYPE_BUY) {
+                $amount += $transaction->amount;
+            }
+            if ($transaction->type == Transaction::TYPE_SELL) {
+                $amount -= $transaction->amount;
+            }
+        }
+        Auth::user()->coins()->updateExistingPivot($coin, [
+            'amount' => $amount
+        ]);
+
         // Delete transaction
         $transaction->delete();
 

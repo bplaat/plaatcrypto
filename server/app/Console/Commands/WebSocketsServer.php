@@ -47,6 +47,8 @@ class WebSocketsServer extends Command
     {
         $loop = Factory::create();
 
+        $websocketsController = new WebSocketsController();
+
         // Connect to Binance websocket live feed
         $connector = new Connector($loop);
 
@@ -56,30 +58,38 @@ class WebSocketsServer extends Command
         foreach ($coins as $coin) {
             $coinsData[$coin->symbol] = [
                 'positionsCache' => [],
-                'positionsTime' => microtime(true),
-                'positionsUpdateTime' => microtime(true)
+                'positionsUpdateTime' => microtime(true),
+                'positionsCacheTime' => microtime(true),
+                'positionsInsertTime' => microtime(true)
             ];
             $streamsString[] = strtolower($coin->symbol) . 'usdt@aggTrade';
         }
 
         $url = 'wss://stream.binance.com:9443/stream?streams=' . implode('/', $streamsString);
         echo 'Connecting to Binance websocket live feed: ' . $url . "\n";
-        $connector($url)->then(function ($connection) use (&$coins, &$coinsData) {
-            $connection->on('message', function ($message) use (&$coins, &$coinsData, $connection) {
+        $connector($url)->then(function ($connection) use (&$websocketsController, &$coins, &$coinsData) {
+            $connection->on('message', function ($message) use (&$websocketsController, &$coins, &$coinsData, $connection) {
                 $message = json_decode($message);
                 $coinSymbol = strtoupper(str_replace('usdt@aggTrade', '', $message->stream));
                 $coin = $coins->first(function ($coin) use ($coinSymbol) {
                     return $coin->symbol == $coinSymbol;
                 });
                 $coinData = &$coinsData[$coinSymbol];
+                $coinPrice = (float)$message->data->p;
 
+                // Check if a minute is over
+                if (microtime(true) - $coinData['positionsInsertTime'] < 60) {
+                    // Send price update to websockets server
+                    if (microtime(true) - $coinData['positionsUpdateTime'] >= 0.25) {
+                        $websocketsController->onCoinUpdate($coinSymbol, $coinPrice);
+                        $coinData['positionsUpdateTime'] = microtime(true);
+                    }
 
-                // Add position to cache per second
-                if (microtime(true) - $coinData['positionsUpdateTime'] < 60) {
-                    if (microtime(true) - $coinData['positionsTime'] >= 1) {
+                    // Add position to cache every second
+                    if (microtime(true) - $coinData['positionsCacheTime'] >= 1) {
                         echo '1 ' . $coinSymbol . ' = ' . $message->data->p . " USDT \n";
-                        $coinData['positionsCache'][] = (float)$message->data->p;
-                        $coinData['positionsTime'] = microtime(true);
+                        $coinData['positionsCache'][] = $coinPrice;
+                        $coinData['positionsCacheTime'] = microtime(true);
                     }
                 } else {
                     // Fit positions cache
@@ -96,13 +106,13 @@ class WebSocketsServer extends Command
                     echo 'Insert ' . $coinSymbol . ' ' . count($coinData['positionsCache']) . ' postions: ' . $prices . "\n";
                     $coin->positions()->create([
                         'prices' => $prices,
-                        'created_at' => date('Y-m-d H:i:s', $coinData['positionsUpdateTime']),
-                        'updated_at' => date('Y-m-d H:i:s', $coinData['positionsUpdateTime'])
+                        'created_at' => date('Y-m-d H:i:s', $coinData['positionsInsertTime']),
+                        'updated_at' => date('Y-m-d H:i:s', $coinData['positionsInsertTime'])
                     ]);
 
                     // Clear positions cache
                     $coinData['positionsCache'] = [];
-                    $coinData['positionsUpdateTime'] = microtime(true);
+                    $coinData['positionsInsertTime'] = microtime(true);
                 }
             });
         }, function ($error) {
@@ -115,7 +125,7 @@ class WebSocketsServer extends Command
         $server = new IoServer(
             new HttpServer(
                 new WsServer(
-                    new WebSocketsController()
+                    $websocketsController
                 )
             ),
             new Reactor('0.0.0.0:8080', $loop),

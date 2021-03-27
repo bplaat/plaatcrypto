@@ -9,24 +9,29 @@ use Ratchet\ConnectionInterface;
 class WebSocketsController extends Controller implements MessageComponentInterface {
     private $connections = [];
 
-    function onOpen(ConnectionInterface $connection) {
+    public function onOpen(ConnectionInterface $connection) {
         $this->connections[$connection->resourceId] = ['connection' => $connection];
     }
 
-    function onMessage(ConnectionInterface $connection, $message) {
+    public function onMessage(ConnectionInterface $connection, $message) {
         echo $message . "\n";
-
-        $connection->send(json_encode([
-            'coins' => Coin::all()
-        ]));
     }
 
-    function onClose(ConnectionInterface $connection) {
+    public function onCoinUpdate(string $coinSymbol, float $price): void {
+        foreach ($this->connections as $connection) {
+            $connection['connection']->send(json_encode([
+                'c' => $coinSymbol,
+                'p' => $price
+            ]));
+        }
+    }
+
+    public function onClose(ConnectionInterface $connection) {
         unset($this->connections[$connection->resourceId]);
     }
 
-    function onError(ConnectionInterface $connection, \Exception $error) {
-        echo 'Error: ' . $error->getMessage() . "\n";
+    public function onError(ConnectionInterface $connection, \Exception $error) {
+        echo 'Websockets Server error: ' . $error->getMessage() . "\n";
 
         unset($this->connections[$connection->resourceId]);
         $connection->close();
