@@ -19,4 +19,18 @@
             <h1 class="title is-spaced">@lang('home.header_guest', ['app.name' => config('app.name')])</h1>
         @endauth
     </div>
+
+    <script>
+    var ws = new WebSocket('ws://localhost:8080/');
+
+    ws.onopen = function () {
+        ws.send('hello!');
+    };
+
+    ws.onmessage = function (event) {
+       var data = JSON.parse(event.data);
+
+       console.log(data.coins);
+    };
+    </script>
 @endsection
