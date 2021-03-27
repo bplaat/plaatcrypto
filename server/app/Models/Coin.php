@@ -17,6 +17,12 @@ class Coin extends Model
         return $this->belongsToMany(User::class)->withPivot('amount');
     }
 
+    // A coin has many positions
+    public function positions()
+    {
+        return $this->hasMany(CoinPosition::class);
+    }
+
     // A coin has many transactions
     public function transactions()
     {

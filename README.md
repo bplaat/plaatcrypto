@@ -50,6 +50,11 @@ A crypto trading tracker website with tradingbot features
     cd server
     php artisan migrate
     ```
+- Start the websocket server with Binance live feed client
+    ```
+    cd server
+    php artisan websockets:serve
+    ```
 - Goto http://plaatcrypto.local/ and you're done! 🎉
 
 ### macOS
