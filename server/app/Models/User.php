@@ -48,16 +48,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    // A user belongs to many coins
-    public function coins()
+    // A user belongs to many portfolios
+    public function portfolios()
     {
-        return $this->belongsToMany(Coin::class)->withPivot('amount');
-    }
-
-    // A user has many transactions
-    public function transactions()
-    {
-        return $this->hasMany(Transaction::class);
+        return $this->belongsToMany(Portfolio::class)->withPivot('role');
     }
 
     // Get user full name (firstname insertion lastname)

@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\Transaction;
+use App\Models\PortfolioUser;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTransactionsTable extends Migration
+class CreatePortfolioUserTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,21 +14,19 @@ class CreateTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('portfolio_user', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->unsignedBigInteger('coin_id');
+            $table->unsignedBigInteger('portfolio_id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedTinyInteger('type')->default(Transaction::TYPE_BUY);
-            $table->unsignedDecimal('amount', 18, 6);
-            $table->unsignedDecimal('price', 18, 6);
-            $table->timestamp('date');
+            $table->unsignedTinyInteger('role')->default(PortfolioUser::ROLE_VIEWER);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
-            $table->foreign('coin_id')
+            $table->unique(['portfolio_id', 'user_id']);
+
+            $table->foreign('portfolio_id')
                 ->references('id')
-                ->on('coins')
+                ->on('portfolios')
                 ->onDelete('cascade');
 
             $table->foreign('user_id')
@@ -45,6 +43,6 @@ class CreateTransactionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('portfolio_user');
     }
 }

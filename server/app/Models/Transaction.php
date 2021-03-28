@@ -11,10 +11,10 @@ class Transaction extends Model
     const TYPE_SELL = 1;
 
     protected $fillable = [
+        'portfolio_id',
         'name',
-        'coin_id',
-        'user_id',
         'type',
+        'coin_id',
         'amount',
         'price',
         'date'
@@ -23,6 +23,12 @@ class Transaction extends Model
     protected $casts = [
         'date' => 'datetime'
     ];
+
+    // A transaction belongs to a portfolio
+    public function portfolio()
+    {
+        return $this->belongsTo(Portfolio::class);
+    }
 
     // Search by a query
     public static function search($query)

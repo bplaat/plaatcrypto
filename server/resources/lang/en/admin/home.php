@@ -6,5 +6,6 @@ return [
     'breadcrumb' => 'Admin',
     'header' => 'The admin zone',
     'users' => 'Users',
-    'coins' => 'Coins'
+    'coins' => 'Coins',
+    'portfolios' => 'Portfolios'
 ];

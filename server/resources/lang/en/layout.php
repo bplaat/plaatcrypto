@@ -6,6 +6,7 @@ return [
     'header.admin.home' => 'Admin',
     'header.admin.users' => 'Users',
     'header.admin.coins' => 'Coins',
+    'header.admin.portfolios' => 'Portfolios',
     'header.settings' => 'Settings',
     'header.logout' => 'Logout',
     'header.login' => 'Login',

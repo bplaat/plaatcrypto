@@ -5,6 +5,8 @@ use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\AdminUsersController;
 use App\Http\Controllers\Admin\AdminCoinsController;
+use App\Http\Controllers\Admin\AdminPortfoliosController;
+use App\Http\Controllers\Admin\AdminPortfolioUsersController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +60,21 @@ Route::middleware('admin')->group(function () {
     Route::get('/admin/coins/{coin}/delete', [AdmincoinsController::class, 'delete'])->name('admin.coins.delete');
     Route::get('/admin/coins/{coin}', [AdmincoinsController::class, 'show'])->name('admin.coins.show');
     Route::post('/admin/coins/{coin}', [AdmincoinsController::class, 'update'])->name('admin.coins.update');
+
+    // Admin portfolios routes
+    Route::get('/admin/portfolios', [AdminPortfoliosController::class, 'index'])->name('admin.portfolios.index');
+    Route::get('/admin/portfolios/create', [AdminPortfoliosController::class, 'create'])->name('admin.portfolios.create');
+    Route::post('/admin/portfolios', [AdminPortfoliosController::class, 'store'])->name('admin.portfolios.store');
+    Route::get('/admin/portfolios/{portfolio}/edit', [AdminPortfoliosController::class, 'edit'])->name('admin.portfolios.edit');
+    Route::get('/admin/portfolios/{portfolio}/delete', [AdminPortfoliosController::class, 'delete'])->name('admin.portfolios.delete');
+    Route::get('/admin/portfolios/{portfolio}', [AdminPortfoliosController::class, 'show'])->name('admin.portfolios.show');
+    Route::post('/admin/portfolios/{portfolio}', [AdminPortfoliosController::class, 'update'])->name('admin.portfolios.update');
+
+    // Admin portfolio user routes
+    Route::post('/admin/portfolios/{portfolio}/users', [AdminPortfolioUsersController::class, 'store'])->name('admin.portfolios.users.create');
+    Route::get('/admin/portfolios/{portfolio}/users/{user}/update', [AdminPortfolioUsersController::class, 'update'])->name('admin.portfolios.users.update');
+    Route::get('/admin/portfolios/{portfolio}/users/{user}/delete', [AdminPortfolioUsersController::class, 'delete'])->name('admin.portfolios.users.delete');
+
 });
 
 // Guest routes
