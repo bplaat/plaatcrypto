@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PortfoliosController;
+use App\Http\Controllers\PortfolioUsersController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\AdminUsersController;
@@ -15,6 +17,27 @@ Route::view('/', 'home')->name('home');
 
 // Normal routes
 Route::middleware('auth')->group(function () {
+    // Portfolios routes
+    Route::get('/portfolios', [PortfoliosController::class, 'index'])->name('portfolios.index');
+    Route::get('/portfolios/create', [PortfoliosController::class, 'create'])->name('portfolios.create');
+    Route::post('/portfolios', [PortfoliosController::class, 'store'])->name('portfolios.store');
+    Route::get('/portfolios/{portfolio}/edit', [PortfoliosController::class, 'edit'])
+        ->name('portfolios.edit')->middleware('can:update,portfolio');
+    Route::get('/portfolios/{portfolio}/delete', [PortfoliosController::class, 'delete'])
+        ->name('portfolios.delete')->middleware('can:delete,portfolio');
+    Route::get('/portfolios/{portfolio}', [PortfoliosController::class, 'show'])
+        ->name('portfolios.show')->middleware('can:view,portfolio');
+    Route::post('/portfolios/{portfolio}', [PortfoliosController::class, 'update'])
+        ->name('portfolios.update')->middleware('can:update,portfolio');
+
+    // Portfolio user routes
+    Route::post('/portfolios/{portfolio}/users', [PortfolioUsersController::class, 'store'])
+        ->name('portfolios.users.create')->middleware('can:create_portfolio_user,portfolio');
+    Route::get('/portfolios/{portfolio}/users/{user}/update', [PortfolioUsersController::class, 'update'])
+        ->name('portfolios.users.update')->middleware('can:update_portfolio_user,portfolio');
+    Route::get('/portfolios/{portfolio}/users/{user}/delete', [PortfolioUsersController::class, 'delete'])
+        ->name('portfolios.users.delete')->middleware('can:delete_portfolio_user,portfolio');
+
     // Transaction routes
     Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/create', [TransactionsController::class, 'create'])->name('transactions.create');

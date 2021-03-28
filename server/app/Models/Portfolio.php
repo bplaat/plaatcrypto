@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Portfolio extends Model
 {
@@ -26,5 +27,13 @@ class Portfolio extends Model
     public static function search($query)
     {
         return static::where('name', 'LIKE', '%' . $query . '%');
+    }
+
+    // Search collection by a query
+    public static function searchCollection($collection, $query)
+    {
+        return $collection->filter(function ($portfolio) use ($query) {
+            return Str::contains(strtolower($portfolio->name), strtolower($query));
+        });
     }
 }

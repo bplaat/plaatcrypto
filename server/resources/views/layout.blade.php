@@ -24,6 +24,19 @@
                 <div class="navbar-menu">
                     @auth
                         <div class="navbar-start">
+                            @if (Auth::user()->portfolios->count() > 0)
+                                <div class="navbar-item has-dropdown is-hoverable">
+                                    <a class="navbar-link is-arrowless" href="{{ route('portfolios.index') }}">@lang('layout.header.portfolios')</a>
+                                    <div class="navbar-dropdown">
+                                        @foreach (Auth::user()->portfolios->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->sortByDesc('pivot.role')->take(10) as $portfolio)
+                                            <a class="navbar-item" href="{{ route('portfolios.show', $portfolio) }}">{{ $portfolio->name }}</a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <a class="navbar-item" href="{{ route('portfolios.index') }}">@lang('layout.header.portfolios')</a>
+                            @endif
+
                             @if (Auth::user()->role == App\Models\User::ROLE_ADMIN)
                                 <div class="navbar-item has-dropdown is-hoverable">
                                     <a class="navbar-link is-arrowless" href="{{ route('admin.home') }}">@lang('layout.header.admin.home')</a>
