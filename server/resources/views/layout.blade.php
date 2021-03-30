@@ -37,6 +37,20 @@
                                 <a class="navbar-item" href="{{ route('portfolios.index') }}">@lang('layout.header.portfolios')</a>
                             @endif
 
+                            @php ($transactions = Auth::user()->transactions())
+                            @if (count($transactions) > 0)
+                                <div class="navbar-item has-dropdown is-hoverable">
+                                    <a class="navbar-link is-arrowless" href="{{ route('transactions.index') }}">@lang('layout.header.transactions')</a>
+                                    <div class="navbar-dropdown">
+                                        @foreach ($transactions->sortByDesc('created_at')->take(10) as $transaction)
+                                            <a class="navbar-item" href="{{ route('transactions.show', $transaction) }}">{{ $transaction->name }}</a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <a class="navbar-item" href="{{ route('transactions.index') }}">@lang('layout.header.transactions')</a>
+                            @endif
+
                             @if (Auth::user()->role == App\Models\User::ROLE_ADMIN)
                                 <div class="navbar-item has-dropdown is-hoverable">
                                     <a class="navbar-link is-arrowless" href="{{ route('admin.home') }}">@lang('layout.header.admin.home')</a>
@@ -51,8 +65,8 @@
 
                         <div class="navbar-end">
                             <div class="navbar-item" style="display: flex; align-items: center;">
-                                <img style="border-radius: 50%; margin-right: 10px;" src="https://www.gravatar.com/avatar/{{ md5(Auth::user()->email) }}?s=48&d=mp" alt="{{ Auth::user()->name() }}'s avatar">
-                                <span>{{ Auth::user()->name() }}</span>
+                                <img style="border-radius: 50%; margin-right: 10px;" src="https://www.gravatar.com/avatar/{{ md5(Auth::user()->email) }}?s=48&d=mp" alt="{{ Auth::user()->name }}'s avatar">
+                                <span>{{ Auth::user()->name }}</span>
                             </div>
                             <div class="navbar-item">
                                 <div class="buttons">

@@ -48,7 +48,7 @@ class AdminCoinsController extends Controller
     // Admin coins show route
     public function show(Coin $coin)
     {
-        return view('admin.coins.show', [ 'coin' => $coin ]);
+        return view('admin.coins.show', ['coin' => $coin]);
     }
 
     // Admin coins edit route

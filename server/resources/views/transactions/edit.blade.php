@@ -18,6 +18,26 @@
         @csrf
 
         <div class="field">
+            <label class="label" for="portfolio_id">@lang('transactions.edit.portfolio')</label>
+
+            <div class="control">
+                <div class="select is-fullwidth @error('portfolio_id') is-danger @enderror">
+                    <select id="portfolio_id" name="portfolio_id" required>
+                        @foreach (Auth::user()->portfolios as $portfolio)
+                            <option value="{{ $portfolio->id }}" @if ($portfolio->id == old('portfolio_id', $transaction->portfolio_id)) selected @endif>
+                                {{ $portfolio->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            @error('portfolio_id')
+                <p class="help is-danger">{{ $errors->first('portfolio_id') }}</p>
+            @enderror
+        </div>
+
+        <div class="field">
             <label class="label" for="name">@lang('transactions.edit.name')</label>
 
             <div class="control">

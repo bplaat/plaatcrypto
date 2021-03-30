@@ -25,7 +25,7 @@
                     <select id="user_id" name="user_id" required>
                         @foreach ($users as $user)
                             <option value="{{ $user->id }}" @if ($user->id == old('user_id', Auth::id())) selected @endif>
-                                {{ $user->name() }}
+                                {{ $user->name }}
                             </option>
                         @endforeach
                     </select>

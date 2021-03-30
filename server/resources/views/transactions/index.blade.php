@@ -41,7 +41,13 @@
                         <a href="{{ route('transactions.show', $transaction) }}">{{ $transaction->name }}</a>
                     </h2>
 
-                    <p><span class="tag">{{ $transaction->date }}</a></span></p>
+                    @if ($transaction->type == App\Models\Transaction::TYPE_BUY)
+                        <p>Buying <strong>{{ formatNumber($transaction->amount) }} {{ $transaction->coin->symbol }}</strong> for <strong>{{ formatNumber($transaction->price) }} USDT</strong> about <strong>{{ $transaction->created_at->diffForHumans() }}</strong></p>
+                    @endif
+
+                    @if ($transaction->type == App\Models\Transaction::TYPE_SELL)
+                        <p>Selling <strong>{{ formatNumber($transaction->amount) }} {{ $transaction->coin->symbol }}</strong> for <strong>{{ formatNumber($transaction->price) }} USDT</strong> about <strong>{{ $transaction->created_at->diffForHumans() }}</strong></p>
+                    @endif
                 </div>
             @endforeach
 

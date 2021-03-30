@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('admin/users.edit.title', ['user.name' => $user->name()]))
+@section('title', __('admin/users.edit.title', ['user.name' => $user->name]))
 
 @section('content')
     <div class="breadcrumb">
@@ -8,7 +8,7 @@
             <li><a href="{{ route('home') }}">{{ config('app.name') }}</a></li>
             <li><a href="{{ route('admin.home') }}">@lang('admin/home.breadcrumb')</a></li>
             <li><a href="{{ route('admin.users.index') }}">@lang('admin/users.index.breadcrumb')</a></li>
-            <li><a href="{{ route('admin.users.show', $user) }}">{{ $user->name() }}</a></li>
+            <li><a href="{{ route('admin.users.show', $user) }}">{{ $user->name }}</a></li>
             <li class="is-active"><a href="{{ route('admin.users.edit', $user) }}">@lang('admin/users.edit.breadcrumb')</a></li>
         </ul>
     </div>

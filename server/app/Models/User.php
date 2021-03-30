@@ -51,11 +51,17 @@ class User extends Authenticatable
     // A user belongs to many portfolios
     public function portfolios()
     {
-        return $this->belongsToMany(Portfolio::class)->withPivot('role');
+        return $this->belongsToMany(Portfolio::class)->withPivot('role')->withTimestamps();
+    }
+
+    // A user has many transactions through its portfolios
+    public function transactions()
+    {
+        return $this->portfolios()->with('transactions')->get()->pluck('transactions')->flatten();
     }
 
     // Get user full name (firstname insertion lastname)
-    public function name()
+    public function getNameAttribute()
     {
         if ($this->insertion != null) {
             return $this->firstname . ' ' . $this->insertion . ' ' . $this->lastname;

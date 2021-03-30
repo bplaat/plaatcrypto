@@ -38,7 +38,7 @@
                     <div class="column is-one-third">
                         <div class="box content" style="height: 100%">
                             <h3 class="title is-4">
-                                {{ $user->name() }}
+                                {{ $user->name }}
 
                                 @if ($user->pivot->role == App\Models\PortfolioUser::ROLE_VIEWER)
                                     <span class="tag is-pulled-right is-success">@lang('portfolios.show.users_role_viewer')</span>
@@ -54,14 +54,14 @@
                                     <div class="buttons">
                                         @can('update_portfolio_user', $portfolio)
                                             @if ($user->pivot->role == App\Models\PortfolioUser::ROLE_ONWER)
-                                                <a class="button is-success" href="{{ route('portfolios.users.update', [$portfolio, $user]) }}?role={{ App\Models\PortfolioUser::ROLE_VIEWER }}">@lang('portfolios.show.users_make_viewer_button')</a>
+                                                <a class="button is-success is-light is-small" href="{{ route('portfolios.users.update', [$portfolio, $user]) }}?role={{ App\Models\PortfolioUser::ROLE_VIEWER }}">@lang('portfolios.show.users_make_viewer_button')</a>
                                             @else
-                                                <a class="button is-info" href="{{ route('portfolios.users.update', [$portfolio, $user]) }}?role={{ App\Models\PortfolioUser::ROLE_ONWER }}">@lang('portfolios.show.users_make_onwer_button')</a>
+                                                <a class="button is-info is-light is-small" href="{{ route('portfolios.users.update', [$portfolio, $user]) }}?role={{ App\Models\PortfolioUser::ROLE_ONWER }}">@lang('portfolios.show.users_make_onwer_button')</a>
                                             @endif
                                         @endcan
 
                                         @can('delete_portfolio_user', $portfolio)
-                                            <a class="button is-danger" href="{{ route('portfolios.users.delete', [$portfolio, $user]) }}">@lang('portfolios.show.users_remove_button')</a>
+                                            <a class="button is-danger is-light is-small" href="{{ route('portfolios.users.delete', [$portfolio, $user]) }}">@lang('portfolios.show.users_remove_button')</a>
                                         @endcan
                                     </div>
                                 @endif
@@ -92,7 +92,7 @@
                                     @foreach ($users as $user)
                                         @if (!$portfolioUsers->pluck('id')->contains($user->id))
                                             <option value="{{ $user->id }}"  @if ($user->id == old('user_id')) selected @endif>
-                                                {{ $user->name() }}
+                                                {{ $user->name }}
                                             </option>
                                         @endif
                                     @endforeach

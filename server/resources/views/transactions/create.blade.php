@@ -17,6 +17,26 @@
         @csrf
 
         <div class="field">
+            <label class="label" for="portfolio_id">@lang('transactions.create.portfolio')</label>
+
+            <div class="control">
+                <div class="select is-fullwidth @error('portfolio_id') is-danger @enderror">
+                    <select id="portfolio_id" name="portfolio_id" required>
+                        @foreach (Auth::user()->portfolios as $portfolio)
+                            <option value="{{ $portfolio->id }}" @if ($portfolio->id == old('portfolio_id', request('portfolio_id'))) selected @endif>
+                                {{ $portfolio->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            @error('portfolio_id')
+                <p class="help is-danger">{{ $errors->first('portfolio_id') }}</p>
+            @enderror
+        </div>
+
+        <div class="field">
             <label class="label" for="name">@lang('transactions.create.name')</label>
 
             <div class="control">
@@ -33,9 +53,9 @@
 
             <div class="control">
                 <div class="select is-fullwidth @error('coin_id') is-danger @enderror">
-                    <select id="coin_id" name="coin_id" required>
+                    <select id="coin_id" name="coin_id" required autofocus>
                         @foreach ($coins as $coin)
-                            <option value="{{ $coin->id }}" @if ($coin->id == old('coin_id')) selected @endif>
+                            <option value="{{ $coin->id }}" @if ($coin->id == old('coin_id', request('coin_id'))) selected @endif>
                                 {{ $coin->name }} ({{ $coin->symbol }})
                             </option>
                         @endforeach

@@ -41,7 +41,7 @@
                     <div class="column is-one-third">
                         <div class="box content" style="height: 100%">
                             <h2 class="title is-4">
-                                <a href="{{ route('admin.users.show', $user) }}">{{ $user->name() }}</a>
+                                <a href="{{ route('admin.users.show', $user) }}">{{ $user->name }}</a>
 
                                 @if ($user->role == App\Models\User::ROLE_NORMAL)
                                     <span class="tag is-pulled-right is-success">@lang('admin/users.index.role_normal')</span>

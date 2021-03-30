@@ -72,7 +72,7 @@ class AdminUsersController extends Controller
     // Admin users show route
     public function show(User $user)
     {
-        return view('admin.users.show', [ 'user' => $user ]);
+        return view('admin.users.show', ['user' => $user]);
     }
 
     // Admin users edit route

@@ -30,6 +30,12 @@ class Transaction extends Model
         return $this->belongsTo(Portfolio::class);
     }
 
+    // A transaction belongs to a coin
+    public function coin()
+    {
+        return $this->belongsTo(Coin::class);
+    }
+
     // Search by a query
     public static function search($query)
     {

@@ -11,7 +11,7 @@
         @auth
             <h1 class="title is-spaced">@lang('home.header_auth', ['user.firstname' => Auth::user()->firstname])</h1>
 
-            <h2 class="subtitle is-5">@lang('home.holdings')</h1>
+            <!-- <h2 class="subtitle is-5">@lang('home.holdings')</h1>
 
             <div class="box content" v-for="holding in holdings">
                 <h3 class="title is-5">@{{ holding.name }} (@{{ holding.symbol }})</h3>
@@ -47,7 +47,7 @@
                         };
                     }
                 });
-            </script>
+            </script> -->
         @else
             <h1 class="title is-spaced">@lang('home.header_guest', ['app.name' => config('app.name')])</h1>
         @endauth

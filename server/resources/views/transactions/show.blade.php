@@ -13,7 +13,14 @@
 
     <div class="box content">
         <h1 class="title is-spaced is-4">{{ $transaction->name }}</h1>
-        <p><span class="tag">{{ $transaction->date }}</a></span></p>
+
+        @if ($transaction->type == App\Models\Transaction::TYPE_BUY)
+            <p>Buying <strong>{{ formatNumber($transaction->amount) }} {{ $transaction->coin->symbol }}</strong> for <strong>{{ formatNumber($transaction->price) }} USDT</strong> about <strong>{{ $transaction->created_at->diffForHumans() }}</strong></p>
+        @endif
+
+        @if ($transaction->type == App\Models\Transaction::TYPE_SELL)
+            <p>Selling <strong>{{ formatNumber($transaction->amount) }} {{ $transaction->coin->symbol }}</strong> for <strong>{{ formatNumber($transaction->price) }} USDT</strong> about <strong>{{ $transaction->created_at->diffForHumans() }}</strong></p>
+        @endif
 
         <div class="buttons">
             <a class="button is-link" href="{{ route('transactions.edit', $transaction) }}">@lang('transactions.show.edit')</a>

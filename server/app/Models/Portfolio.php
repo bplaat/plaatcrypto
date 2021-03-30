@@ -14,7 +14,7 @@ class Portfolio extends Model
     // A portfolio belongs to many users
     public function users()
     {
-        return $this->belongsToMany(User::class)->withPivot('role');
+        return $this->belongsToMany(User::class)->withPivot('role')->withTimestamps();
     }
 
     // A protfolio has many transactions
