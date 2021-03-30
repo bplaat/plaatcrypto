@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminUsersController;
 use App\Http\Controllers\Admin\AdminCoinsController;
 use App\Http\Controllers\Admin\AdminPortfoliosController;
 use App\Http\Controllers\Admin\AdminPortfolioUsersController;
+use App\Http\Controllers\Admin\AdminTransactionsController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -98,6 +99,14 @@ Route::middleware('admin')->group(function () {
     Route::get('/admin/portfolios/{portfolio}/users/{user}/update', [AdminPortfolioUsersController::class, 'update'])->name('admin.portfolios.users.update');
     Route::get('/admin/portfolios/{portfolio}/users/{user}/delete', [AdminPortfolioUsersController::class, 'delete'])->name('admin.portfolios.users.delete');
 
+    // Admin transaction routes
+    Route::get('/admin/transactions', [AdminTransactionsController::class, 'index'])->name('admin.transactions.index');
+    Route::get('/admin/transactions/create', [AdminTransactionsController::class, 'create'])->name('admin.transactions.create');
+    Route::post('/admin/transactions', [AdminTransactionsController::class, 'store'])->name('admin.transactions.store');
+    Route::get('/admin/transactions/{transaction}/edit', [AdminTransactionsController::class, 'edit'])->name('admin.transactions.edit');
+    Route::get('/admin/transactions/{transaction}/delete', [AdminTransactionsController::class, 'delete'])->name('admin.transactions.delete');
+    Route::get('/admin/transactions/{transaction}', [AdminTransactionsController::class, 'show'])->name('admin.transactions.show');
+    Route::post('/admin/transactions/{transaction}', [AdminTransactionsController::class, 'update'])->name('admin.transactions.update');
 });
 
 // Guest routes

@@ -58,6 +58,7 @@
                                         <a class="navbar-item" href="{{ route('admin.users.index') }}">@lang('layout.header.admin.users')</a>
                                         <a class="navbar-item" href="{{ route('admin.coins.index') }}">@lang('layout.header.admin.coins')</a>
                                         <a class="navbar-item" href="{{ route('admin.portfolios.index') }}">@lang('layout.header.admin.portfolios')</a>
+                                        <a class="navbar-item" href="{{ route('admin.transactions.index') }}">@lang('layout.header.admin.transactions')</a>
                                     </div>
                                 </div>
                             @endif

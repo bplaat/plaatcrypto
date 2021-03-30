@@ -7,5 +7,6 @@ return [
     'header' => 'The admin zone',
     'users' => 'Users',
     'coins' => 'Coins',
-    'portfolios' => 'Portfolios'
+    'portfolios' => 'Portfolios',
+    'transactions' => 'Transactions'
 ];

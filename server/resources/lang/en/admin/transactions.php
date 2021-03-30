@@ -1,8 +1,8 @@
 <?php
 
 return [
-    // Transactions index page
-    'index.title' => 'Transactions',
+    // Admin transactions index page
+    'index.title' => 'Transactions - Admin',
     'index.breadcrumb' => 'Transactions',
     'index.header' => 'All the transactions',
     'index.search_field' => 'Search for transactions...',
@@ -13,8 +13,8 @@ return [
     'index.selling' => 'Selling :coin for :price about :time',
     'index.from_portfolio' => 'From the :portfolio.name portfolio',
 
-    // Transactions create page
-    'create.title' => 'Create - Transactions',
+    // Admin transactions create page
+    'create.title' => 'Create - Transactions - Admin',
     'create.breadcrumb' => 'Create',
     'create.header' => 'Create new transaction',
     'create.portfolio' => 'Portfolio',
@@ -29,16 +29,16 @@ return [
     'create.time' => 'Time',
     'create.button' => 'Create new transaction',
 
-    // Transactions show page
-    'show.title' => ':transaction.name - Transactions',
+    // Admin transactions show page
+    'show.title' => ':transaction.name - Transactions - Admin',
     'show.buying' => 'Buying :coin for :price about :time',
     'show.selling' => 'Selling :coin for :price about :time',
     'show.from_portfolio' => 'From the :portfolio.name portfolio',
     'show.edit' => 'Edit transaction',
     'show.delete' => 'Delete transaction',
 
-    // Transactions edit page
-    'edit.title' => 'Edit - :transaction.name - Transactions',
+    // Admin transactions edit page
+    'edit.title' => 'Edit - :transaction.name - Transactions - Admin',
     'edit.breadcrumb' => 'Edit',
     'edit.header' => 'Edit transaction',
     'edit.portfolio' => 'Portfolio',

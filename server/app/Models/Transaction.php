@@ -41,4 +41,12 @@ class Transaction extends Model
     {
         return static::where('name', 'LIKE', '%' . $query . '%');
     }
+
+    // Search collection by a query
+    public static function searchCollection($collection, $query)
+    {
+        return $collection->filter(function ($transaction) use ($query) {
+            return Str::contains(strtolower($transaction->name), strtolower($query));
+        });
+    }
 }

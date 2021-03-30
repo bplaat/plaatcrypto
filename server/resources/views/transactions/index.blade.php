@@ -42,12 +42,14 @@
                     </h2>
 
                     @if ($transaction->type == App\Models\Transaction::TYPE_BUY)
-                        <p>Buying <strong>{{ formatNumber($transaction->amount) }} {{ $transaction->coin->symbol }}</strong> for <strong>{{ formatNumber($transaction->price) }} USDT</strong> about <strong>{{ $transaction->created_at->diffForHumans() }}</strong></p>
+                        <p>@lang('transactions.index.buying', ['coin' => '<strong>' . formatNumber($transaction->amount) . ' ' . $transaction->coin->symbol . '</strong>', 'price' => '<strong>' . formatNumber($transaction->price) . ' USDT</strong>', 'time' => '<strong>' . $transaction->created_at->diffForHumans() . '</strong>'])</p>
                     @endif
 
                     @if ($transaction->type == App\Models\Transaction::TYPE_SELL)
-                        <p>Selling <strong>{{ formatNumber($transaction->amount) }} {{ $transaction->coin->symbol }}</strong> for <strong>{{ formatNumber($transaction->price) }} USDT</strong> about <strong>{{ $transaction->created_at->diffForHumans() }}</strong></p>
+                        <p>@lang('transactions.index.selling', ['coin' => '<strong>' . formatNumber($transaction->amount) . ' ' . $transaction->coin->symbol . '</strong>', 'price' => '<strong>' . formatNumber($transaction->price) . ' USDT</strong>', 'time' => '<strong>' . $transaction->created_at->diffForHumans() . '</strong>'])</p>
                     @endif
+
+                    <p>@lang('transactions.index.from_portfolio', ['portfolio.name' => '<a href="' . route('portfolios.show', $transaction->portfolio) . '">' . $transaction->portfolio->name . '</a>' ])</p>
                 </div>
             @endforeach
 
