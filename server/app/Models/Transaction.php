@@ -6,18 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
-    // A transaction can be a buy or a sell transaction
-    const TYPE_BUY = 0;
-    const TYPE_SELL = 1;
+    // A transaction can be different things
+    const TYPE_TRADE = 0;
+    const TYPE_COMMISSION = 1;
+    const TYPE_DEPOSIT = 2;
+    const TYPE_WITHDRAW = 3;
+    const TYPE_STACKING = 4;
 
     protected $fillable = [
         'portfolio_id',
-        'name',
         'type',
-        'coin_id',
-        'amount',
-        'price',
-        'date'
+        'from_coin_id',
+        'from_amount',
+        'to_coin_id',
+        'to_amount',
+        'date',
+        'notes'
     ];
 
     protected $casts = [
@@ -30,10 +34,16 @@ class Transaction extends Model
         return $this->belongsTo(Portfolio::class);
     }
 
-    // A transaction belongs to a coin
-    public function coin()
+    // A transaction belongs to a from coin
+    public function fromCoin()
     {
-        return $this->belongsTo(Coin::class);
+        return $this->belongsTo(Coin::class, 'from_coin_id');
+    }
+
+    // A transaction belongs to a to coin
+    public function toCoin()
+    {
+        return $this->belongsTo(Coin::class, 'to_coin_id');
     }
 
     // Search by a query

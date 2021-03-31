@@ -53,7 +53,8 @@ Route::middleware('auth')->group(function () {
         ->name('transactions.update')->middleware('can:update,transaction');
 
     // Settings routes
-    Route::view('/settings', 'settings')->name('settings');
+    Route::get('/settings', [SettingsController::class, 'settings'])->name('settings');
+    Route::post('/settings/change_defaults', [SettingsController::class, 'changeDefaults'])->name('settings.change_defaults');
     Route::post('/settings/change_details', [SettingsController::class, 'changeDetails'])->name('settings.change_details');
     Route::post('/settings/change_password', [SettingsController::class, 'changePassword'])->name('settings.change_password');
 

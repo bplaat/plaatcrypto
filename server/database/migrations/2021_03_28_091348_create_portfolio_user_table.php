@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\PortfolioUser;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +17,7 @@ class CreatePortfolioUserTable extends Migration
             $table->id();
             $table->unsignedBigInteger('portfolio_id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedTinyInteger('role')->default(PortfolioUser::ROLE_VIEWER);
+            $table->unsignedTinyInteger('role');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

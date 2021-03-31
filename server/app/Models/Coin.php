@@ -17,10 +17,16 @@ class Coin extends Model
         return $this->hasMany(CoinPosition::class);
     }
 
-    // A coin has many transactions
-    public function transactions()
+    // A coin has many from transactions
+    public function fromTransactions()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Transaction::class, 'from_coin_id');
+    }
+
+    // A coin has many to transactions
+    public function toTransactions()
+    {
+        return $this->hasMany(Transaction::class, 'to_coin_id');
     }
 
     // Search by a query

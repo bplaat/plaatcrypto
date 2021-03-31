@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTransactionsTable extends Migration
+class CreateSettingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,30 +13,26 @@ class CreateTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('portfolio_id');
-            $table->unsignedTinyInteger('type');
-            $table->unsignedBigInteger('from_coin_id')->nullable();
-            $table->unsignedDecimal('from_amount', 21, 9)->nullable();
-            $table->unsignedBigInteger('to_coin_id')->nullable();
-            $table->unsignedDecimal('to_amount', 21, 9)->nullable();
-            $table->timestamp('date');
-            $table->text('notes')->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('home_coin_id');
+            $table->unsignedBigInteger('default_commission_coin_id');
+            $table->unsignedDecimal('default_commission_percent', 21, 9);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
-            $table->foreign('portfolio_id')
+            $table->foreign('user_id')
                 ->references('id')
-                ->on('portfolios')
+                ->on('users')
                 ->onDelete('cascade');
 
-            $table->foreign('from_coin_id')
+            $table->foreign('home_coin_id')
                 ->references('id')
                 ->on('coins')
                 ->onDelete('cascade');
 
-            $table->foreign('to_coin_id')
+            $table->foreign('default_commission_coin_id')
                 ->references('id')
                 ->on('coins')
                 ->onDelete('cascade');
@@ -50,6 +46,6 @@ class CreateTransactionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('settings');
     }
 }

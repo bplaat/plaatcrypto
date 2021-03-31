@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -63,6 +64,13 @@ class AdminUsersController extends Controller
             'country' => $fields['country'],
             'password' => Hash::make($fields['password']),
             'role' => $fields['role']
+        ]);
+
+        // Create settings
+        $user->settings()->create([
+            'home_coin_id' => config('settings.default_home_coin_id'),
+            'default_commission_coin_id' => config('settings.default_commission.coin_id'),
+            'default_commission_percent' => config('settings.default_commission.percent')
         ]);
 
         // Go to the new admin user show page

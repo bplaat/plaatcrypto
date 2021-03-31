@@ -19,6 +19,80 @@
         </div>
     @endif
 
+    <!-- Change defaults form -->
+    <form class="box" method="POST" action="{{ route('settings.change_defaults') }}">
+        @csrf
+
+        <h2 class="title is-4">@lang('settings.change_defaults_title')</h2>
+
+        <div class="field">
+            <label class="label" for="home_coin_id">@lang('settings.home_coin')</label>
+
+            <div class="control">
+                <div class="select is-fullwidth @error('home_coin_id') is-danger @enderror">
+                    <select id="home_coin_id" name="home_coin_id" required autofocus>
+                        @foreach ($coins as $coin)
+                            <option value="{{ $coin->id }}" @if ($coin->id == old('home_coin_id', Auth::user()->settings->home_coin_id))) selected @endif>
+                                {{ $coin->name }} ({{ $coin->symbol }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            @error('home_coin_id')
+                <p class="help is-danger">{{ $errors->first('home_coin_id') }}</p>
+            @enderror
+        </div>
+
+        <div class="columns">
+            <div class="column">
+                <label class="label" for="default_commission_percent">@lang('settings.default_commission_percent')</label>
+
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input class="input" type="number" min="0" step="0.000000001" id="default_commission_percent" name="default_commission_percent"
+                            value="{{ old('default_commission_percent', Auth::user()->settings->default_commission_percent) }}">
+                    </div>
+
+                    <div class="control">
+                        <a class="button is-static">%</a>
+                    </div>
+                </div>
+
+                @error('default_commission_percent')
+                    <p class="help is-danger">{{ $errors->first('default_commission_percent') }}</p>
+                @enderror
+            </div>
+
+            <div class="column">
+                <label class="label" for="default_commission_coin_id">@lang('settings.default_commission_coin')</label>
+
+                <div class="control">
+                    <div class="select is-fullwidth @error('default_commission_coin_id') is-danger @enderror">
+                        <select id="default_commission_coin_id" name="default_commission_coin_id" required autofocus>
+                            @foreach ($coins as $coin)
+                                <option value="{{ $coin->id }}" @if ($coin->id == old('coin_id', Auth::user()->settings->default_commission_coin_id))) selected @endif>
+                                    {{ $coin->name }} ({{ $coin->symbol }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                @error('default_commission_coin_id')
+                    <p class="help is-danger">{{ $errors->first('default_commission_coin_id') }}</p>
+                @enderror
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="control">
+                <button class="button is-link" type="submit">@lang('settings.change_defaults_button')</button>
+            </div>
+        </div>
+    </form>
+
     <!-- Change details form -->
     <form class="box" method="POST" action="{{ route('settings.change_details') }}">
         @csrf

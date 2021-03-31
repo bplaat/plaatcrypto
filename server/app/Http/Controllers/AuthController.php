@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -55,7 +55,7 @@ class AuthController extends Controller
         ]);
 
         // Create user
-        User::create([
+        $user = User::create([
             'firstname' => $fields['firstname'],
             'insertion' => $fields['insertion'],
             'lastname' => $fields['lastname'],
@@ -71,6 +71,13 @@ class AuthController extends Controller
 
             // First created account is always admin
             'role' => User::count() == 0 ? User::ROLE_ADMIN : User::ROLE_NORMAL
+        ]);
+
+        // Create settings
+        $user->settings()->create([
+            'home_coin_id' => config('settings.default_home_coin_id'),
+            'default_commission_coin_id' => config('settings.default_commission.coin_id'),
+            'default_commission_percent' => config('settings.default_commission.percent')
         ]);
 
         // Login user in

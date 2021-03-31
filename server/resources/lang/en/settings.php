@@ -5,6 +5,14 @@ return [
     'title' => 'Settings',
     'breadcrumb' => 'Settings',
 
+    // Change defaults part
+    'change_defaults_title' => 'Change defaults',
+    'home_coin' => 'Home coin (display profit in this coin)',
+    'default_commission_percent' => 'Default commission percent (calculate commission by a procent of buy amount)',
+    'default_commission_coin' => 'Default commission coin (pay commission in this coin by default)',
+    'change_defaults_button' => 'Change defaults',
+    'change_defaults_message' => 'Your defaults have changed',
+
     // Change details part
     'change_details_title' => 'Change details',
     'firstname' => 'First name',

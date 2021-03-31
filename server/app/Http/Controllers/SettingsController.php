@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\Coin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +11,38 @@ use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
 {
+    // Settings route
+    public function settings()
+    {
+        // Get all the coins
+        $coins = Coin::all();
+
+        // Return settings view
+        return view('settings', ['coins' => $coins]);
+    }
+
+    // Change defaults route
+    public function changeDefaults(Request $request)
+    {
+        // Validate input
+        $fields = $request->validate([
+            'home_coin_id' => 'required|integer|exists:coins,id',
+            'default_commission_percent' => 'required|numeric|min:0',
+            'default_commission_coin_id' => 'required|integer|exists:coins,id'
+        ]);
+
+        // Update user settings
+        Auth::user()->settings->update([
+            'home_coin_id' => $fields['home_coin_id'],
+            'default_commission_percent' => $fields['default_commission_percent'],
+            'default_commission_coin_id' => $fields['default_commission_coin_id']
+        ]);
+
+        // Go back with message
+        return redirect()->route('settings')
+            ->with('message', __('settings.change_defaults_message'));
+    }
+
     // Change details route
     public function changeDetails(Request $request)
     {

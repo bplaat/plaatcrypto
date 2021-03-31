@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('firstname');
             $table->string('insertion')->nullable();
             $table->string('lastname');
-            $table->unsignedTinyInteger('gender')->default(User::GENDER_MALE);
+            $table->unsignedTinyInteger('gender');
             $table->date('birthday');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -30,7 +29,7 @@ class CreateUsersTable extends Migration
             $table->string('country');
             $table->string('password');
             $table->rememberToken();
-            $table->unsignedTinyInteger('role')->default(User::ROLE_NORMAL);
+            $table->unsignedTinyInteger('role');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

@@ -60,6 +60,12 @@ class User extends Authenticatable
         return $this->portfolios()->with('transactions')->get()->pluck('transactions')->flatten();
     }
 
+    // A user has a settings
+    public function settings()
+    {
+        return $this->hasOne(Settings::class);
+    }
+
     // Get user full name (firstname insertion lastname)
     public function getNameAttribute()
     {
