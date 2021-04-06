@@ -13,6 +13,7 @@ body {
     line-height: 1.5;
     background-color: #111;
     color: #fff;
+    margin: 16px;
 }
 a {
     color: #29f;
@@ -26,7 +27,8 @@ a {
         <h2>Coins:</h2>
         <ul>
             <li v-for="coin in coins.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))">
-                {{ coin.symbol }} = {{ coin.price != null ? coin.price.toFixed(4) + ' ' + baseSymbol : '?' }}
+                {{ coin.symbol }} = {{ coin.price != null ? coin.price.toFixed(4) + ' ' + baseSymbol : '?' }} |
+                {{ coin.price != null && homeCoin != null ? (coin.price / homeCoin.price).toFixed(4) + ' ' + homeSymbol : '?' }}
             </li>
         </ul>
 
@@ -46,6 +48,10 @@ a {
             <li v-for="transaction in transactions.slice().reverse()">
                 <span v-if="transaction.type == 'deposit'">
                     <strong>Deposit:</strong> +{{ transaction.toAmount.toFixed(4) }} {{ transaction.toSymbol }}
+                </span>
+
+                <span v-if="transaction.type == 'withdraw'">
+                    <strong>Withdraw:</strong> -{{ transaction.fromAmount.toFixed(4) }} {{ transaction.fromSymbol }}
                 </span>
 
                 <span v-if="transaction.type == 'trade'">
@@ -160,15 +166,14 @@ const app = new Vue({
         },
 
         commissionsTotalAmount: function () {
-            const commissionCoin = this.coins.find(coin => coin.symbol == this.commission.symbol);
-            if (commissionCoin.price == null) {
-                return null;
-            }
-
             let totalCommissionAmount = 0;
             for (const transaction of this.transactions) {
                 if (transaction.type == 'commission') {
-                    totalCommissionAmount += transaction.fromAmount * commissionCoin.price;
+                    const fromCoin = this.coins.find(coin => coin.symbol == transaction.fromSymbol);
+                    if (fromCoin.price == null) {
+                        return null;
+                    }
+                    totalCommissionAmount += transaction.fromAmount * fromCoin.price;
                 }
             }
 
@@ -198,6 +203,26 @@ const app = new Vue({
                 fromAmount: null,
                 toSymbol: symbol,
                 toAmount: amount,
+                time: Date.now()
+            });
+
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+        },
+
+        withdrawTransaction: function (symbol, amount) {
+            // Adjust holdings
+            const holding = this.holdings.find(holding => holding.symbol == symbol);
+            holding.amount -= amount;
+
+            localStorage.setItem('holdings', JSON.stringify(this.holdings));
+
+            // Create transaction
+            this.transactions.push({
+                type: 'withdraw',
+                fromSymbol: symbol,
+                fromAmount: amount,
+                toSymbol: null,
+                toAmount: null,
                 time: Date.now()
             });
 
