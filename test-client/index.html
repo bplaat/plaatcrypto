@@ -11,9 +11,11 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-size: 16px;
     line-height: 1.5;
+    background-color: #111;
+    color: #fff;
 }
 a {
-    color: #16c;
+    color: #29f;
 }
     </style>
 </head>
@@ -23,25 +25,25 @@ a {
 
         <h2>Coins:</h2>
         <ul>
-            <li v-for="coin in coins.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))" :key="coin.symbol">
-                {{ coin.symbol }} = {{ coin.price != null ? coin.price.toFixed(4) + ' USDT' : '?' }}
+            <li v-for="coin in coins.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))">
+                {{ coin.symbol }} = {{ coin.price != null ? coin.price.toFixed(4) + ' ' + baseSymbol : '?' }}
             </li>
         </ul>
 
         <h2>Holdings:</h2>
         <p>
-            Total amount: {{ holdingsTotalAmount != null ? holdingsTotalAmount.toFixed(4) : '?' }} USDT<br>
-            Total commissions: {{ commissionsTotalAmount != null ? commissionsTotalAmount.toFixed(4) : '?' }} USDT
+            Total amount: {{ holdingsTotalAmount != null && homeCoin != null ? (holdingsTotalAmount / homeCoin.price).toFixed(4) : '?' }} {{ homeSymbol }}<br>
+            Total commissions: {{ commissionsTotalAmount != null && homeCoin != null ? (commissionsTotalAmount / homeCoin.price).toFixed(4) : '?' }} {{ homeSymbol }}
         </p>
         <ul>
-            <li v-for="holding in holdings.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))" :key="holding.symbol">
-                {{ holding.amount.toFixed(4) }} {{ holding.symbol }} = {{ holding.price != null ? (holding.amount * holding.price).toFixed(4) + ' USDT' : '?' }}
+            <li v-for="holding in holdings.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))">
+                {{ holding.amount.toFixed(4) }} {{ holding.symbol }} = {{ holding.price != null && homeCoin != null ? (holding.amount * holding.price / homeCoin.price).toFixed(4) + ' ' + homeSymbol : '?' }}
             </li>
         </ul>
 
         <h2>Transactions:</h2>
         <ul>
-            <li v-for="transaction in transactions.slice().reverse()" :key="transaction.time">
+            <li v-for="transaction in transactions.slice().reverse()">
                 <span v-if="transaction.type == 'deposit'">
                     <strong>Deposit:</strong> +{{ transaction.toAmount.toFixed(4) }} {{ transaction.toSymbol }}
                 </span>
@@ -62,19 +64,26 @@ a {
 const app = new Vue({
     el: '#app',
     data: {
+        baseSymbol: 'USDT',
+        homeSymbol: 'EUR',
+
         commission: {
             percent: 0.00075,
             symbol: 'BNB'
         },
+
         coins: [
             { symbol: 'USDT', price: 1 },
-            { symbol: 'BNB', price: null },
+            { symbol: 'EUR', price: null },
             { symbol: 'ADA', price: null },
+            { symbol: 'BNB', price: null },
             { symbol: 'CAKE', price: null },
-            { symbol: 'DOT', price: null },
             { symbol: 'DOGE', price: null },
-            { symbol: 'LTC', price: null }
+            { symbol: 'DOT', price: null },
+            { symbol: 'LTC', price: null },
+            { symbol: 'TRX', price: null }
         ],
+
         holdings: [],
         transactions: []
     },
@@ -97,22 +106,23 @@ const app = new Vue({
         // Connect to Binance WebSocket API
         let streamStrings = [];
         for (let coin of self.coins) {
-            if (coin.symbol != 'USDT') {
-                streamStrings.push(coin.symbol.toLowerCase() + 'usdt@aggTrade');
+            if (coin.symbol != self.baseSymbol) {
+                streamStrings.push(coin.symbol.toLowerCase() + self.baseSymbol.toLowerCase() + '@aggTrade');
             }
         }
+
         const ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=' + streamStrings.join('/'));
 
         ws.onmessage = function (event) {
             const message = JSON.parse(event.data);
-            const symbol = message.stream.replace('usdt@aggTrade', '').toUpperCase();
+            const symbol = message.stream.replace(self.baseSymbol.toLowerCase() + '@aggTrade', '').toUpperCase();
 
             // Update coins and holdings with the new price
             const coin = self.coins.find(coin => coin.symbol == symbol);
             coin.price = parseFloat(message.data.p);
 
             for (const holding of self.holdings) {
-                if (holding.symbol == 'USDT') {
+                if (holding.symbol == self.baseSymbol) {
                     Vue.set(holding, 'price', 1);
                 }
 
@@ -128,6 +138,16 @@ const app = new Vue({
     },
 
     computed: {
+        baseCoin: function () {
+            const baseCoin = this.coins.find(coin => coin.symbol == this.baseSymbol);
+            return baseCoin.price != null ? baseCoin : null;
+        },
+
+        homeCoin: function () {
+            const homeCoin = this.coins.find(coin => coin.symbol == this.homeSymbol);
+            return homeCoin.price != null ? homeCoin : null;
+        },
+
         holdingsTotalAmount: function () {
             let totalAmount = 0;
             for (const holding of this.holdings) {
@@ -151,6 +171,7 @@ const app = new Vue({
                     totalCommissionAmount += transaction.fromAmount * commissionCoin.price;
                 }
             }
+
             return totalCommissionAmount;
         }
     },
