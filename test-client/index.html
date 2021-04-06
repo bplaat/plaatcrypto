@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaatCrypto</title>
+    <script src="https://unpkg.com/vue@2.6.12/dist/vue.min.js"></script>
+    <style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+a {
+    color: #16c;
+}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>PlaatCrypto</h1>
+
+        <h2>Coins:</h2>
+        <ul>
+            <li v-for="coin in coins.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))" :key="coin.symbol">
+                {{ coin.symbol }} = {{ coin.price != null ? coin.price.toFixed(4) + ' USDT' : '?' }}
+            </li>
+        </ul>
+
+        <h2>Holdings:</h2>
+        <p>
+            Total amount: {{ holdingsTotalAmount != null ? holdingsTotalAmount.toFixed(4) : '?' }} USDT<br>
+            Total commissions: {{ commissionsTotalAmount != null ? commissionsTotalAmount.toFixed(4) : '?' }} USDT
+        </p>
+        <ul>
+            <li v-for="holding in holdings.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))" :key="holding.symbol">
+                {{ holding.amount.toFixed(4) }} {{ holding.symbol }} = {{ holding.price != null ? (holding.amount * holding.price).toFixed(4) + ' USDT' : '?' }}
+            </li>
+        </ul>
+
+        <h2>Transactions:</h2>
+        <ul>
+            <li v-for="transaction in transactions.slice().reverse()" :key="transaction.time">
+                <span v-if="transaction.type == 'deposit'">
+                    <strong>Deposit:</strong> +{{ transaction.toAmount.toFixed(4) }} {{ transaction.toSymbol }}
+                </span>
+
+                <span v-if="transaction.type == 'trade'">
+                    <strong>Trade:</strong> {{ transaction.fromAmount.toFixed(4) }} {{ transaction.fromSymbol }} -> {{ transaction.toAmount.toFixed(4) }} {{ transaction.toSymbol }}
+                </span>
+
+                <span v-if="transaction.type == 'commission'">
+                    <strong>Commission:</strong> -{{ transaction.fromAmount.toFixed(8) }} {{ transaction.fromSymbol }}
+                </span>
+            </li>
+        </ul>
+
+        <p>Made by <a href="https://bastiaan.ml/" target="_blank">Bastiaan van der Plaat</a></p>
+    </div>
+<script>
+const app = new Vue({
+    el: '#app',
+    data: {
+        commission: {
+            percent: 0.00075,
+            symbol: 'BNB'
+        },
+        coins: [
+            { symbol: 'USDT', price: 1 },
+            { symbol: 'BNB', price: null },
+            { symbol: 'ADA', price: null },
+            { symbol: 'CAKE', price: null },
+            { symbol: 'DOT', price: null },
+            { symbol: 'DOGE', price: null },
+            { symbol: 'LTC', price: null }
+        ],
+        holdings: [],
+        transactions: []
+    },
+
+    created: function () {
+        const self = this;
+
+        // Load all holdings and transactions
+        if (localStorage.getItem('holdings') != null) {
+            self.holdings = JSON.parse(localStorage.getItem('holdings'));
+            for (const holding of self.holdings) {
+                holding.price = null;
+            }
+            self.transactions = JSON.parse(localStorage.getItem('transactions'));
+        } else {
+            self.depositTransaction('USDT', 1000);
+            self.depositTransaction('BNB', 1);
+        }
+
+        // Connect to Binance WebSocket API
+        let streamStrings = [];
+        for (let coin of self.coins) {
+            if (coin.symbol != 'USDT') {
+                streamStrings.push(coin.symbol.toLowerCase() + 'usdt@aggTrade');
+            }
+        }
+        const ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=' + streamStrings.join('/'));
+
+        ws.onmessage = function (event) {
+            const message = JSON.parse(event.data);
+            const symbol = message.stream.replace('usdt@aggTrade', '').toUpperCase();
+
+            // Update coins and holdings with the new price
+            const coin = self.coins.find(coin => coin.symbol == symbol);
+            coin.price = parseFloat(message.data.p);
+
+            for (const holding of self.holdings) {
+                if (holding.symbol == 'USDT') {
+                    Vue.set(holding, 'price', 1);
+                }
+
+                if (holding.symbol == symbol) {
+                    Vue.set(holding, 'price', coin.price);
+                }
+            }
+        };
+
+        ws.onclose = function () {
+            alert('Binance WebSocket API connection closed!');
+        };
+    },
+
+    computed: {
+        holdingsTotalAmount: function () {
+            let totalAmount = 0;
+            for (const holding of this.holdings) {
+                if (holding.price == null) {
+                    return null;
+                }
+                totalAmount += holding.amount * holding.price;
+            }
+            return totalAmount;
+        },
+
+        commissionsTotalAmount: function () {
+            const commissionCoin = this.coins.find(coin => coin.symbol == this.commission.symbol);
+            if (commissionCoin.price == null) {
+                return null;
+            }
+
+            let totalCommissionAmount = 0;
+            for (const transaction of this.transactions) {
+                if (transaction.type == 'commission') {
+                    totalCommissionAmount += transaction.fromAmount * commissionCoin.price;
+                }
+            }
+            return totalCommissionAmount;
+        }
+    },
+
+    methods: {
+        depositTransaction: function (symbol, amount) {
+            // Adjust holdings
+            const holding = this.holdings.find(holding => holding.symbol == symbol);
+            if (holding != null) {
+                holding.amount += amount;
+            } else {
+                this.holdings.push({
+                    symbol: symbol,
+                    amount: amount
+                });
+            }
+
+            localStorage.setItem('holdings', JSON.stringify(this.holdings));
+
+            // Create transaction
+            this.transactions.push({
+                type: 'deposit',
+                fromSymbol: null,
+                fromAmount: null,
+                toSymbol: symbol,
+                toAmount: amount,
+                time: Date.now()
+            });
+
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+        },
+
+        tradeTransaction: function (fromSymbol, fromAmount, toSymbol) {
+            // Calculate to amount
+            const fromCoin = this.coins.find(coin => coin.symbol == fromSymbol);
+            const toCoin = this.coins.find(coin => coin.symbol == toSymbol);
+            const toAmount = fromAmount * fromCoin.price / toCoin.price;
+
+            // Adjust holdings
+            const fromHolding = this.holdings.find(holding => holding.symbol == fromSymbol);
+            if (fromHolding.amount < fromAmount) {
+                return;
+            }
+            fromHolding.amount -= fromAmount;
+
+            const toHolding = this.holdings.find(holding => holding.symbol == toSymbol);
+            if (toHolding != null) {
+                toHolding.amount += toAmount;
+            } else {
+                this.holdings.push({
+                    symbol: toSymbol,
+                    amount: toAmount
+                });
+            }
+
+            localStorage.setItem('holdings', JSON.stringify(this.holdings));
+
+            // Create transaction
+            this.transactions.push({
+                type: 'trade',
+                fromSymbol: fromSymbol,
+                fromAmount: fromAmount,
+                toSymbol: toSymbol,
+                toAmount: toAmount,
+                time: Date.now()
+            });
+
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+
+            // Create commission transaction
+            this.commissionTransaction(toSymbol, toAmount);
+        },
+
+        commissionTransaction: function (symbol, amount) {
+            // Calculate commission in commission coin
+            const coin = this.coins.find(coin => coin.symbol == symbol);
+            const commissionCoin = this.coins.find(coin => coin.symbol == this.commission.symbol);
+
+            const commissionAmount = amount * coin.price * this.commission.percent / commissionCoin.price;
+
+            // Adjust holdings
+            const commissionHolding = this.holdings.find(holding => holding.symbol == this.commission.symbol);
+            commissionHolding.amount -= commissionAmount;
+
+            localStorage.setItem('holdings', JSON.stringify(this.holdings));
+
+            // Create transaction
+            this.transactions.push({
+                type: 'commission',
+                fromSymbol: this.commission.symbol,
+                fromAmount: commissionAmount,
+                toSymbol: null,
+                toAmount: null,
+                time: Date.now()
+            });
+
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+        }
+    }
+});
+</script>
+</body>
+</html>

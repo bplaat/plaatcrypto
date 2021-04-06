@@ -1,6 +1,17 @@
 # bplaat/plaatcrypto
 A crypto trading tracker website with tradingbot features
 
+## Todo list
+- Admin settings crud
+- Portfolios users to edit page
+- Admin portfolios users to edit page
+- Transactions crud
+- Admin transactions crud
+- Websocket server
+- Portfolio show page
+- Admin portfolio show page
+- Home page
+
 ## Installation
 
 ### Windows
