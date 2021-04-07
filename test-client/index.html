@@ -47,6 +47,7 @@ a {
                 <coin-price :price="coin.price / homeCoin.price" :symbol="homeCoin.symbol"></coin-price>
             </li>
         </ul>
+        <hr>
 
         <h2>Holdings:</h2>
         <p>
@@ -62,6 +63,7 @@ a {
                 <coin-price :price="holding.amount * holding._coin.price / homeCoin.price" :symbol="homeCoin.symbol"></coin-price>
             </li>
         </ul>
+        <hr>
 
         <h2>Transactions:</h2>
         <ul>
@@ -83,6 +85,33 @@ a {
                 </span>
             </li>
         </ul>
+        <hr>
+
+        <h2>Settings</h2>
+        <p>
+            <label for="home_coin">Home coin:</label>
+
+            <select id="home_coin" v-model="homeCoinId">
+                <option v-for="coin in alphaSortedCoins" :value="coin.id" :selected="coin.id == homeCoinId">
+                    {{ coin.name}} ({{ coin.symbol}})
+                </option>
+            </select>
+        </p>
+        <p>
+            <label for="commision_percent">Commision percent:</label>
+
+            <input type="text" id="commision_percent" v-model="commission.percent" /> % |
+
+
+            <label for="commission_coin">Commision coin:</label>
+
+            <select id="commission_coin" v-model="commission.coinId">
+                <option v-for="coin in alphaSortedCoins" :value="coin.id" :selected="coin.id == commission.coinId">
+                    {{ coin.name}} ({{ coin.symbol}})
+                </option>
+            </select>
+        </p>
+        <hr>
 
         <p>Made by <a href="https://bastiaan.ml/" target="_blank">Bastiaan van der Plaat</a></p>
     </div>
@@ -114,7 +143,7 @@ Vue.component('coin-price', {
         }
     },
 
-    template: '<span :class="{ \'coin-price\': true, up: newPrice != 1 && oldPrice < newPrice, down: newPrice != 1 && oldPrice > newPrice }">' +
+    template: '<span :class="{ \'coin-price\': true, up: price != 1 && oldPrice < newPrice, down: price != 1 && oldPrice > newPrice }">' +
         '{{ isReady ? (price < 10 ? price.toFixed(4) : price.toFixed(2)) : "?" }} {{ symbol }} ' +
         '<span class="arrow">{{ isReady ? (price != 1 ? (oldPrice < newPrice ? "\u2191" : "\u2193") : "-") : "" }}</span>' +
     '</span>'
@@ -122,6 +151,7 @@ Vue.component('coin-price', {
 
 const app = new Vue({
     el: '#app',
+
     data: {
         baseCoinId: 1, // USDT
         homeCoinId: 2, // EUR
@@ -132,25 +162,53 @@ const app = new Vue({
         },
 
         coins: [
-            { id: 1, symbol: 'USDT', price: 1 },
-            { id: 2, symbol: 'EUR', price: null },
-            { id: 3, symbol: 'BNB', price: null },
-            { id: 4, symbol: 'ADA', price: null },
-            { id: 5, symbol: 'BTC', price: null },
-            { id: 6, symbol: 'ETH', price: null },
-            { id: 7, symbol: 'CAKE', price: null },
-            { id: 8, symbol: 'DOGE', price: null },
-            { id: 9, symbol: 'DOT', price: null },
-            { id: 10, symbol: 'LTC', price: null },
-            { id: 11, symbol: 'TRX', price: null }
+            { id: 1, name: 'USD Tether', symbol: 'USDT', price: 1 },
+            { id: 2, name: 'Euro', symbol: 'EUR', price: null },
+            { id: 3, name: 'Binance Coin', symbol: 'BNB', price: null },
+            { id: 4, name: 'Cardano', symbol: 'ADA', price: null },
+            { id: 5, name: 'Bitcoin', symbol: 'BTC', price: null },
+            { id: 6, name: 'Ethereum', symbol: 'ETH', price: null },
+            { id: 7, name: 'Pancake', symbol: 'CAKE', price: null },
+            { id: 8, name: 'Dogecoin', symbol: 'DOGE', price: null },
+            { id: 9, name: 'Polkadot', symbol: 'DOT', price: null },
+            { id: 10, name: 'Litecoin', symbol: 'LTC', price: null },
+            { id: 11, name: 'TRON', symbol: 'TRX', price: null }
         ],
+        transactions: [],
+        holdings: []
+    },
 
-        holdings: [],
-        transactions: []
+    watch: {
+        homeCoinId: function (value) {
+            localStorage.setItem('home_coin_id', value);
+        },
+
+        'commission.percent': function (value) {
+            localStorage.setItem('commission_percent', value);
+        },
+
+        'commission.coinId': function (value) {
+            localStorage.setItem('commission_coin_id', value);
+        }
     },
 
     created: function () {
         const self = this;
+
+        // Load home coin id
+        if (localStorage.getItem('home_coin_id') != null) {
+            this.homeCoinId = parseInt(localStorage.getItem('home_coin_id'));
+        }
+
+        // Load commission percent
+        if (localStorage.getItem('commission_percent') != null) {
+            this.commission.percent = parseFloat(localStorage.getItem('commission_percent'));
+        }
+
+        // Load commission coin id
+        if (localStorage.getItem('commission_coin_id') != null) {
+            this.commission.coinId = parseInt(localStorage.getItem('commission_coin_id'));
+        }
 
         // Load transactions
         if (localStorage.getItem('transactions') != null) {
@@ -199,6 +257,10 @@ const app = new Vue({
 
         sortedCoins: function () {
             return this.coins.slice().sort((a, b) => b.price - a.price);
+        },
+
+        alphaSortedCoins: function () {
+            return this.coins.slice().sort((a, b) => a.name.localeCompare(b.name));
         },
 
         sortedHoldings: function () {
