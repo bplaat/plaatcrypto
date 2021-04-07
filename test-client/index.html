@@ -32,7 +32,6 @@ a {
 }
 
 .arrow {
-    font-size: 125%;
     font-weight: 700;
 }
     </style>
@@ -51,12 +50,16 @@ a {
 
         <h2>Holdings:</h2>
         <p>
-            Total amount: <coin-price :price="holdingsTotalAmount / homeCoin.price" :symbol="homeCoin.symbol"></coin-price><br>
-            Total commissions: <coin-price :price="commissionsTotalAmount / homeCoin.price" :symbol="homeCoin.symbol"></coin-price>
+            Total amount: <coin-price :price="holdingsTotalAmount" :symbol="baseCoin.symbol"></coin-price> |
+            <coin-price :price="holdingsTotalAmount / homeCoin.price" :symbol="homeCoin.symbol"></coin-price><br>
+
+            Total commissions: <coin-price :price="commissionsTotalAmount" :symbol="baseCoin.symbol"></coin-price> |
+            <coin-price :price="commissionsTotalAmount / homeCoin.price" :symbol="homeCoin.symbol"></coin-price>
         </p>
         <ul>
             <li v-for="holding in sortedHoldings" :key="holding.id" v-if="holding.amount > 0">
-                {{ holding.amount.toFixed(4) }} {{ holding._coin.symbol }} = <coin-price :price="holding.amount * holding._coin.price / homeCoin.price" :symbol="homeCoin.symbol"></coin-price>
+                {{ holding.amount.toFixed(4) }} {{ holding._coin.symbol }} = <coin-price :price="holding.amount * holding._coin.price" :symbol="baseCoin.symbol"></coin-price> |
+                <coin-price :price="holding.amount * holding._coin.price / homeCoin.price" :symbol="homeCoin.symbol"></coin-price>
             </li>
         </ul>
 
@@ -89,6 +92,7 @@ Vue.component('coin-price', {
 
     data: function () {
         return {
+            newPrice: 0,
             oldPrice: 0,
             updateTime: Date.now()
         };
@@ -102,16 +106,17 @@ Vue.component('coin-price', {
 
     watch: {
         price: function (newPrice, oldPrice) {
-            if (Date.now() - this.updateTime >= 2500) {
+            if (Date.now() - this.updateTime >= 2000) {
+                this.newPrice = newPrice;
                 this.oldPrice = oldPrice;
                 this.updateTime = Date.now();
             }
         }
     },
 
-    template: '<span :class="{ \'coin-price\': true, up: price != 1 && oldPrice < price, down: price != 1 && oldPrice > price }">' +
-        '{{ isReady ? price.toFixed(4) : "?" }} {{ symbol }} ' +
-        '<span class="arrow">{{ isReady ? (price != 1 ? (oldPrice < price ? "\u2191" : "\u2193") : "-") : "" }}</span>' +
+    template: '<span :class="{ \'coin-price\': true, up: newPrice != 1 && oldPrice < newPrice, down: newPrice != 1 && oldPrice > newPrice }">' +
+        '{{ isReady ? (price < 10 ? price.toFixed(4) : price.toFixed(2)) : "?" }} {{ symbol }} ' +
+        '<span class="arrow">{{ isReady ? (price != 1 ? (oldPrice < newPrice ? "\u2191" : "\u2193") : "-") : "" }}</span>' +
     '</span>'
 });
 
