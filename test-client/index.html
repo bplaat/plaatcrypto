@@ -26,40 +26,40 @@ a {
 
         <h2>Coins:</h2>
         <ul>
-            <li v-for="coin in coins.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))">
-                {{ coin.symbol }} = {{ coin.price != null ? coin.price.toFixed(4) + ' ' + baseSymbol : '?' }} |
-                {{ coin.price != null && homeCoin != null ? (coin.price / homeCoin.price).toFixed(4) + ' ' + homeSymbol : '?' }}
+            <li v-for="coin in sortedCoins" :key="coin.id">
+                {{ coin.symbol }} = {{ coin.price != null ? coin.price.toFixed(4) + ' ' + baseCoin.symbol : '?' }} |
+                {{ coin.price != null && homeCoin.price != null ? (coin.price / homeCoin.price).toFixed(4) + ' ' + homeCoin.symbol : '?' }}
             </li>
         </ul>
 
         <h2>Holdings:</h2>
         <p>
-            Total amount: {{ holdingsTotalAmount != null && homeCoin != null ? (holdingsTotalAmount / homeCoin.price).toFixed(4) : '?' }} {{ homeSymbol }}<br>
-            Total commissions: {{ commissionsTotalAmount != null && homeCoin != null ? (commissionsTotalAmount / homeCoin.price).toFixed(4) : '?' }} {{ homeSymbol }}
+            Total amount: {{ holdingsTotalAmount != null && homeCoin.price != null ? (holdingsTotalAmount / homeCoin.price).toFixed(4) + ' ' + homeCoin.symbol : '?' }}<br>
+            Total commissions: {{ commissionsTotalAmount != null && homeCoin.price != null ? (commissionsTotalAmount / homeCoin.price).toFixed(4) + ' ' + homeCoin.symbol : '?' }}
         </p>
         <ul>
-            <li v-for="holding in holdings.slice().sort((a, b) => a.symbol.localeCompare(b.symbol))">
-                {{ holding.amount.toFixed(4) }} {{ holding.symbol }} = {{ holding.price != null && homeCoin != null ? (holding.amount * holding.price / homeCoin.price).toFixed(4) + ' ' + homeSymbol : '?' }}
+            <li v-for="holding in sortedHoldings" :key="holding.id" v-if="holding.amount > 0">
+                {{ holding.amount.toFixed(4) }} {{ holding._coin.symbol }} = {{ holding._coin.price != null && homeCoin.price != null ? (holding.amount * holding._coin.price / homeCoin.price).toFixed(4) + ' ' + homeCoin.symbol : '?' }}
             </li>
         </ul>
 
         <h2>Transactions:</h2>
         <ul>
-            <li v-for="transaction in transactions.slice().reverse()">
+            <li v-for="transaction in sortedTransactions" :key="transaction.id">
                 <span v-if="transaction.type == 'deposit'">
-                    <strong>Deposit:</strong> +{{ transaction.toAmount.toFixed(4) }} {{ transaction.toSymbol }}
+                    <strong>Deposit:</strong> +{{ transaction.toAmount.toFixed(4) }} {{ transaction._toCoin.symbol }}
                 </span>
 
                 <span v-if="transaction.type == 'withdraw'">
-                    <strong>Withdraw:</strong> -{{ transaction.fromAmount.toFixed(4) }} {{ transaction.fromSymbol }}
+                    <strong>Withdraw:</strong> -{{ transaction.fromAmount.toFixed(4) }} {{ transaction._fromCoin.symbol }}
                 </span>
 
                 <span v-if="transaction.type == 'trade'">
-                    <strong>Trade:</strong> {{ transaction.fromAmount.toFixed(4) }} {{ transaction.fromSymbol }} -> {{ transaction.toAmount.toFixed(4) }} {{ transaction.toSymbol }}
+                    <strong>Trade:</strong> {{ transaction.fromAmount.toFixed(4) }} {{ transaction._fromCoin.symbol }} -> {{ transaction.toAmount.toFixed(4) }} {{ transaction._toCoin.symbol }}
                 </span>
 
                 <span v-if="transaction.type == 'commission'">
-                    <strong>Commission:</strong> -{{ transaction.fromAmount.toFixed(8) }} {{ transaction.fromSymbol }}
+                    <strong>Commission:</strong> -{{ transaction.fromAmount.toFixed(8) }} {{ transaction._fromCoin.symbol }}
                 </span>
             </li>
         </ul>
@@ -70,24 +70,26 @@ a {
 const app = new Vue({
     el: '#app',
     data: {
-        baseSymbol: 'USDT',
-        homeSymbol: 'EUR',
+        baseCoinId: 1, // USDT
+        homeCoinId: 2, // EUR
 
         commission: {
             percent: 0.00075,
-            symbol: 'BNB'
+            coinId: 3 // BNB
         },
 
         coins: [
-            { symbol: 'USDT', price: 1 },
-            { symbol: 'EUR', price: null },
-            { symbol: 'ADA', price: null },
-            { symbol: 'BNB', price: null },
-            { symbol: 'CAKE', price: null },
-            { symbol: 'DOGE', price: null },
-            { symbol: 'DOT', price: null },
-            { symbol: 'LTC', price: null },
-            { symbol: 'TRX', price: null }
+            { id: 1, symbol: 'USDT', price: 1 },
+            { id: 2, symbol: 'EUR', price: null },
+            { id: 3, symbol: 'BNB', price: null },
+            { id: 4, symbol: 'ADA', price: null },
+            { id: 5, symbol: 'BTC', price: null },
+            { id: 6, symbol: 'ETH', price: null },
+            { id: 7, symbol: 'CAKE', price: null },
+            { id: 8, symbol: 'DOGE', price: null },
+            { id: 9, symbol: 'DOT', price: null },
+            { id: 10, symbol: 'LTC', price: null },
+            { id: 11, symbol: 'TRX', price: null }
         ],
 
         holdings: [],
@@ -97,13 +99,9 @@ const app = new Vue({
     created: function () {
         const self = this;
 
-        // Load all holdings and transactions
-        if (localStorage.getItem('holdings') != null) {
-            self.holdings = JSON.parse(localStorage.getItem('holdings'));
-            for (const holding of self.holdings) {
-                holding.price = null;
-            }
-            self.transactions = JSON.parse(localStorage.getItem('transactions'));
+        // Load transactions
+        if (localStorage.getItem('transactions') != null) {
+            this.loadTransactions();
         } else {
             self.depositTransaction('USDT', 1000);
             self.depositTransaction('BNB', 1);
@@ -112,8 +110,8 @@ const app = new Vue({
         // Connect to Binance WebSocket API
         let streamStrings = [];
         for (let coin of self.coins) {
-            if (coin.symbol != self.baseSymbol) {
-                streamStrings.push(coin.symbol.toLowerCase() + self.baseSymbol.toLowerCase() + '@aggTrade');
+            if (coin.id != self.baseCoinId) {
+                streamStrings.push(coin.symbol.toLowerCase() + self.baseCoin.symbol.toLowerCase() + '@aggTrade');
             }
         }
 
@@ -121,21 +119,11 @@ const app = new Vue({
 
         ws.onmessage = function (event) {
             const message = JSON.parse(event.data);
-            const symbol = message.stream.replace(self.baseSymbol.toLowerCase() + '@aggTrade', '').toUpperCase();
+            const symbol = message.stream.replace(self.baseCoin.symbol.toLowerCase() + '@aggTrade', '').toUpperCase();
 
-            // Update coins and holdings with the new price
-            const coin = self.coins.find(coin => coin.symbol == symbol);
+            // Update coin price
+            const coin = self.findCoin(symbol);
             coin.price = parseFloat(message.data.p);
-
-            for (const holding of self.holdings) {
-                if (holding.symbol == self.baseSymbol) {
-                    Vue.set(holding, 'price', 1);
-                }
-
-                if (holding.symbol == symbol) {
-                    Vue.set(holding, 'price', coin.price);
-                }
-            }
         };
 
         ws.onclose = function () {
@@ -145,22 +133,30 @@ const app = new Vue({
 
     computed: {
         baseCoin: function () {
-            const baseCoin = this.coins.find(coin => coin.symbol == this.baseSymbol);
-            return baseCoin.price != null ? baseCoin : null;
+            return this.coins.find(coin => coin.id == this.baseCoinId);
         },
 
         homeCoin: function () {
-            const homeCoin = this.coins.find(coin => coin.symbol == this.homeSymbol);
-            return homeCoin.price != null ? homeCoin : null;
+            return this.coins.find(coin => coin.id == this.homeCoinId);
+        },
+
+        sortedCoins: function () {
+            return this.coins.slice().sort((a, b) => a.symbol.localeCompare(b.symbol));
+        },
+
+        sortedHoldings: function () {
+            return this.holdings.slice().sort((a, b) => a._coin.symbol.localeCompare(b._coin.symbol));
+        },
+
+        sortedTransactions: function () {
+            return this.transactions.slice().reverse();
         },
 
         holdingsTotalAmount: function () {
             let totalAmount = 0;
             for (const holding of this.holdings) {
-                if (holding.price == null) {
-                    return null;
-                }
-                totalAmount += holding.amount * holding.price;
+                if (holding._coin.price == null) return null;
+                totalAmount += holding.amount * holding._coin.price;
             }
             return totalAmount;
         },
@@ -169,131 +165,210 @@ const app = new Vue({
             let totalCommissionAmount = 0;
             for (const transaction of this.transactions) {
                 if (transaction.type == 'commission') {
-                    const fromCoin = this.coins.find(coin => coin.symbol == transaction.fromSymbol);
-                    if (fromCoin.price == null) {
-                        return null;
-                    }
-                    totalCommissionAmount += transaction.fromAmount * fromCoin.price;
+                    if (transaction._fromCoin.price == null) return null;
+                    totalCommissionAmount += transaction.fromAmount * transaction._fromCoin.price;
                 }
             }
-
             return totalCommissionAmount;
         }
     },
 
     methods: {
-        depositTransaction: function (symbol, amount) {
-            // Adjust holdings
-            const holding = this.holdings.find(holding => holding.symbol == symbol);
-            if (holding != null) {
-                holding.amount += amount;
-            } else {
-                this.holdings.push({
-                    symbol: symbol,
-                    amount: amount
+        // Helpers
+        now: function () {
+            return 'performance' in window ? window.performance.now() : Date.now();
+        },
+
+        findCoin: function (coin) {
+            if (typeof coin == 'string') {
+                return this.coins.find(a => a.symbol == coin);
+            }
+
+            if (typeof coin == 'number') {
+                return this.coins.find(a => a.id == coin);
+            }
+
+            return coin;
+        },
+
+        findHolding: function (coinId) {
+            return this.holdings.find(holding => holding.coinId == coinId);
+        },
+
+        // Load transactions from LocalStorage
+        loadTransactions: function () {
+            this.transactions = JSON.parse(localStorage.getItem('transactions'));
+
+            // Reconstruct the current holdings from transactions
+            for (const transaction of this.transactions) {
+                transaction._toCoin = this.findCoin(transaction.toCoinId);
+                transaction._fromCoin = this.findCoin(transaction.fromCoinId);
+
+                if (transaction.type == 'deposit') {
+                    this.depositHolding(transaction._toCoin, transaction.toAmount);
+                }
+
+                if (transaction.type == 'widthdraw') {
+                    this.withdrawHolding(transaction._fromCoin, transaction.fromAmount);
+                }
+
+                if (transaction.type == 'trade') {
+                    this.tradeHolding(transaction._fromCoin, transaction.fromAmount, transaction._toCoin, transaction.toAmount);
+                }
+
+                if (transaction.type == 'commission') {
+                    this.withdrawHolding(transaction._fromCoin, transaction.fromAmount);
+                }
+            }
+        },
+
+        // Save transactions to LocalStorage
+        saveTransactions: function () {
+            const transactionsJson = [];
+            for (const transaction of this.transactions) {
+                transactionsJson.push({
+                    id: transaction.id,
+                    type: transaction.type,
+                    fromCoinId: transaction.fromCoinId,
+                    fromAmount: transaction.fromAmount,
+                    toCoinId: transaction.toCoinId,
+                    toAmount: transaction.toAmount,
+                    time: this.now()
                 });
             }
-
-            localStorage.setItem('holdings', JSON.stringify(this.holdings));
-
-            // Create transaction
-            this.transactions.push({
-                type: 'deposit',
-                fromSymbol: null,
-                fromAmount: null,
-                toSymbol: symbol,
-                toAmount: amount,
-                time: Date.now()
-            });
-
-            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+            localStorage.setItem('transactions', JSON.stringify(transactionsJson));
         },
 
-        withdrawTransaction: function (symbol, amount) {
-            // Adjust holdings
-            const holding = this.holdings.find(holding => holding.symbol == symbol);
-            holding.amount -= amount;
-
-            localStorage.setItem('holdings', JSON.stringify(this.holdings));
-
-            // Create transaction
-            this.transactions.push({
-                type: 'withdraw',
-                fromSymbol: symbol,
-                fromAmount: amount,
-                toSymbol: null,
-                toAmount: null,
-                time: Date.now()
-            });
-
-            localStorage.setItem('transactions', JSON.stringify(this.transactions));
-        },
-
-        tradeTransaction: function (fromSymbol, fromAmount, toSymbol) {
-            // Calculate to amount
-            const fromCoin = this.coins.find(coin => coin.symbol == fromSymbol);
-            const toCoin = this.coins.find(coin => coin.symbol == toSymbol);
-            const toAmount = fromAmount * fromCoin.price / toCoin.price;
-
-            // Adjust holdings
-            const fromHolding = this.holdings.find(holding => holding.symbol == fromSymbol);
-            if (fromHolding.amount < fromAmount) {
-                return;
-            }
-            fromHolding.amount -= fromAmount;
-
-            const toHolding = this.holdings.find(holding => holding.symbol == toSymbol);
+        // Deposit transaction
+        depositHolding: function (toCoin, toAmount) {
+            const toHolding = this.findHolding(toCoin.id);
             if (toHolding != null) {
                 toHolding.amount += toAmount;
             } else {
                 this.holdings.push({
-                    symbol: toSymbol,
+                    id: this.holdings.length + 1,
+                    _coin: toCoin,
+                    coinId: toCoin.id,
                     amount: toAmount
                 });
             }
-
-            localStorage.setItem('holdings', JSON.stringify(this.holdings));
-
-            // Create transaction
-            this.transactions.push({
-                type: 'trade',
-                fromSymbol: fromSymbol,
-                fromAmount: fromAmount,
-                toSymbol: toSymbol,
-                toAmount: toAmount,
-                time: Date.now()
-            });
-
-            localStorage.setItem('transactions', JSON.stringify(this.transactions));
-
-            // Create commission transaction
-            this.commissionTransaction(toSymbol, toAmount);
         },
 
-        commissionTransaction: function (symbol, amount) {
-            // Calculate commission in commission coin
-            const coin = this.coins.find(coin => coin.symbol == symbol);
-            const commissionCoin = this.coins.find(coin => coin.symbol == this.commission.symbol);
+        depositTransaction: function (toCoin, toAmount) {
+            toCoin = this.findCoin(toCoin);
 
-            const commissionAmount = amount * coin.price * this.commission.percent / commissionCoin.price;
+            this.depositHolding(toCoin, toAmount);
 
-            // Adjust holdings
-            const commissionHolding = this.holdings.find(holding => holding.symbol == this.commission.symbol);
-            commissionHolding.amount -= commissionAmount;
-
-            localStorage.setItem('holdings', JSON.stringify(this.holdings));
-
-            // Create transaction
             this.transactions.push({
-                type: 'commission',
-                fromSymbol: this.commission.symbol,
-                fromAmount: commissionAmount,
-                toSymbol: null,
-                toAmount: null,
-                time: Date.now()
+                id: this.transactions.length + 1,
+                type: 'deposit',
+
+                _fromCoin: null,
+                fromCoinId: null,
+                fromAmount: null,
+
+                _toCoin: toCoin,
+                toCoinId: toCoin.id,
+                toAmount: toAmount,
+
+                time: this.now()
             });
 
-            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+            this.saveTransactions();
+        },
+
+        // Withdraw transaction
+        withdrawHolding: function (fromCoin, fromAmount) {
+            const fromHolding = this.findHolding(fromCoin.id);
+            if (fromHolding.amount < fromAmount) {
+                alert('Holding has to low amount!');
+            }
+
+            fromHolding.amount -= fromAmount;
+        },
+
+        withdrawTransaction: function (fromCoin, fromAmount) {
+            fromCoin = this.findCoin(fromCoin);
+
+            this.withdrawHolding(fromCoin, fromAmount);
+
+            this.transactions.push({
+                id: this.transactions.length + 1,
+                type: 'withdraw',
+
+                _fromCoin: fromCoin,
+                fromCoinId: fromCoin.id,
+                fromAmount: fromAmount,
+
+                _toCoin: null,
+                toCoinId: null,
+                toAmount: null,
+
+                time: this.now()
+            });
+
+            this.saveTransactions();
+        },
+
+        // Trade transaction
+        tradeHolding: function (fromCoin, fromAmount, toCoin, toAmount = null) {
+            if (toAmount == null) {
+                toAmount = fromAmount * fromCoin.price / toCoin.price;
+            }
+
+            this.withdrawHolding(fromCoin, fromAmount);
+            this.depositHolding(toCoin, toAmount);
+
+            return toAmount;
+        },
+
+        tradeTransaction: function (fromCoin, fromAmount, toCoin, toAmount = null) {
+            fromCoin = this.findCoin(fromCoin);
+            toCoin = this.findCoin(toCoin);
+
+            toAmount = this.tradeHolding(fromCoin, fromAmount, toCoin, toAmount);
+
+            this.transactions.push({
+                id: this.transactions.length + 1,
+                type: 'trade',
+
+                _fromCoin: fromCoin,
+                fromCoinId: fromCoin.id,
+                fromAmount: fromAmount,
+
+                _toCoin: toCoin,
+                toCoinId: toCoin.id,
+                toAmount: toAmount,
+
+                time: this.now()
+            });
+
+            this.commissionTransaction(toCoin, toAmount);
+        },
+
+        // Commission transaction
+        commissionTransaction: function (coin, amount) {
+            const commissionCoin = this.findCoin(this.commission.coinId);
+            coin = this.findCoin(coin);
+            const commissionAmount = amount * coin.price * this.commission.percent / commissionCoin.price;
+            this.withdrawHolding(commissionCoin, commissionAmount);
+
+            this.transactions.push({
+                id: this.transactions.length + 1,
+                type: 'commission',
+
+                _fromCoin: commissionCoin,
+                fromCoinId: commissionCoin.id,
+                fromAmount: commissionAmount,
+
+                _toCoin: null,
+                toCoinId: null,
+                toAmount: null,
+
+                time: this.now()
+            });
+
+            this.saveTransactions();
         }
     }
 });
