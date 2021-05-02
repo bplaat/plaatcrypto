@@ -7,40 +7,24 @@
     <title>PlaatCrypto</title>
     <script src="https://unpkg.com/vue@2.6.12/dist/vue.min.js"></script>
     <style>
-body {
+body, input, select {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-size: 16px;
     line-height: 1.5;
-    background-color: #111;
-    color: #fff;
-    margin: 16px;
 }
-a {
-    color: #29f;
-}
-
-.coin-price {
-    transition: color .1s linear;
-}
-
-.up {
-    color: #0f0;
-}
-
-.down {
-    color: #f00;
-}
-
-.arrow {
-    font-weight: 700;
-}
+body{background-color:#111;color:#fff;margin:16px}
+a{color:#29f}
+.coin-price{transition:color .1s linear}
+.up{color:#0f0}
+.down{color:#f00}
+.arrow{font-weight:700}
     </style>
 </head>
 <body>
     <div id="app">
         <h1>PlaatCrypto</h1>
 
-        <h2>Coins:</h2>
+        <h2>Coins</h2>
         <ul>
             <li v-for="coin in sortedCoins" :key="coin.id">
                 {{ coin.symbol }} = <coin-price :price="coin.price" :symbol="baseCoin.symbol"></coin-price> |
@@ -49,7 +33,7 @@ a {
         </ul>
         <hr>
 
-        <h2>Holdings:</h2>
+        <h2>Holdings</h2>
         <p>
             Total amount: <coin-price :price="holdingsTotalAmount" :symbol="baseCoin.symbol"></coin-price> |
             <coin-price :price="holdingsTotalAmount / homeCoin.price" :symbol="homeCoin.symbol"></coin-price><br>
@@ -65,7 +49,7 @@ a {
         </ul>
         <hr>
 
-        <h2>Transactions:</h2>
+        <h2>Transactions</h2>
         <ul>
             <li v-for="transaction in sortedTransactions" :key="transaction.id">
                 <span v-if="transaction.type == 'deposit'">
@@ -101,7 +85,6 @@ a {
             <label for="commision_percent">Commision percent:</label>
 
             <input type="text" id="commision_percent" v-model="commission.percent" /> % |
-
 
             <label for="commission_coin">Commision coin:</label>
 
@@ -214,8 +197,8 @@ const app = new Vue({
         if (localStorage.getItem('transactions') != null) {
             this.loadTransactions();
         } else {
-            self.depositTransaction('USDT', 1000);
-            self.depositTransaction('BNB', 1);
+            // self.depositTransaction('USDT', 1000);
+            // self.depositTransaction('BNB', 1);
         }
 
         // Connect to Binance WebSocket API
